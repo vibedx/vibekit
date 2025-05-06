@@ -1,10 +1,11 @@
-# Node.js template
+# 🧩 VibeKit
 
-This is a Node.js project.
+A CLI-first developer toolkit that **keeps you vibing while you build.**  
+Manage tickets, project context, and AI suggestions — all inside your repo.
 
-Add your [configuration](https://codesandbox.io/docs/projects/learn/setting-up/tasks) to optimize it for [CodeSandbox](https://codesandbox.io/p/dashboard).
+## Usage
 
-## Resources
-
-- [CodeSandbox — Docs](https://codesandbox.io/docs/learn)
-- [CodeSandbox — Discord](https://discord.gg/Ggarp3pX5H)
+```bash
+npm install
+npm link
+vibe init
