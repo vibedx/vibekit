@@ -1,0 +1,39 @@
+# VibeKit Configuration
+# Created: 2025-05-26
+
+# Project settings
+project:
+  name: "vibekit" # Default to directory name, can be customized
+  description: "CLI tool for managing tickets, project context, and AI suggestions"
+  
+# Ticket settings
+tickets:
+  path: ".vibe/tickets"
+  id_format: "TKT-{number}"
+  status_options:
+    - open
+    - in_progress
+    - review
+    - done
+  priority_options:
+    - low
+    - medium
+    - high
+    - critical
+
+# AI integration settings
+ai:
+  enabled: true
+  provider: "openai" # Default AI provider
+  model: "gpt-4" # Default model
+  context_window: 10 # Number of recent tickets to include in context
+
+# UI settings
+ui:
+  theme: "default"
+  color_scheme: "dark"
+  
+# Hooks
+hooks:
+  pre_commit: false # Enable/disable pre-commit hook
+  post_checkout: false # Enable/disable post-checkout hook
