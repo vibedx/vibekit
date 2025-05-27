@@ -10,6 +10,7 @@ project:
 tickets:
   path: ".vibe/tickets"
   id_format: "TKT-{number}"
+  default_template: ".vibe/.templates/default.md"
   status_options:
     - open
     - in_progress

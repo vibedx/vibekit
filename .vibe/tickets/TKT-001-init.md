@@ -1,9 +1,9 @@
 ---
 id: TKT-001
 title: Implement vibe init command
-status: open
+status: done
 priority: high
-created_at: 2025-05-26
+created_at: 2025-05-26T00:00:00.000Z
 ---
 
 ## Description
@@ -12,6 +12,7 @@ Implement the `vibe init` command which creates a `.vibe/` folder in the user's 
 
 ## Requirements
 
+- Support optional folder name argument in `vibe init [folderName]`
 - Create a `.vibe/` directory in the user's repository
 - Generate a default `config.yml` file with sensible defaults
 - Create a `tickets/` subdirectory for storing ticket files
@@ -23,3 +24,6 @@ Implement the `vibe init` command which creates a `.vibe/` folder in the user's 
 - Running `vibe init` in a new repository creates all necessary files and directories
 - The command is idempotent (can be run multiple times without issues)
 - Clear success/error messages are displayed to the user
+- Running `vibe init folderName` creates the structure in the specified folder
+- A test exists to validate folder creation, config file, and tickets directory
+- Tests confirm idempotency and correct output messages

@@ -3,12 +3,16 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "vibe": "index.js"
+  },
   "scripts": {
     "start": "node --watch index.js"
   },
   "keywords": [],
   "author": "Ives van Hoorne",
   "license": "MIT",
-  "devDependencies": {},
-  "dependencies": {}
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
 }
