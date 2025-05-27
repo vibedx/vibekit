@@ -12,7 +12,7 @@ const [command, ...commandArgs] = process.argv.slice(2);
 
 try {
   if (!command) {
-    console.log("Available commands: init, new, close, list");
+    console.log("Available commands: init, new, close, list, get-started");
     process.exit(0);
   }
   
@@ -30,7 +30,7 @@ try {
     }
   } catch (err) {
     if (err.code === 'ERR_MODULE_NOT_FOUND') {
-      console.log("Available commands: init, new, close, list");
+      console.log("Available commands: init, new, close, list, get-started");
       console.error(`❌ Command '${command}' not found.`);
     } else {
       console.error(`❌ Error executing command '${command}': ${err.message}`);

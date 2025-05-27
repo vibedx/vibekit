@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
+import getStartedCommand from '../get-started/index.js';
 
 // ESM replacement for __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -32,6 +33,19 @@ function initCommand(args) {
   fs.copyFileSync(templateSrc, path.join(targetFolder, ".templates", "default.md"));
 
   console.log(`✅ '${targetFolder}' initialized with config, tickets/, and .templates/default.md`);
+  
+  // Ask if the user wants to run get-started
+  console.log("\nWould you like to create sample tickets and documentation? (y/n)");
+  
+  // Since we can't get user input directly in this environment, we'll check for a flag
+  const runGetStarted = args.includes("--with-samples") || args.includes("-s");
+  
+  if (runGetStarted) {
+    // Run the get-started command to create sample tickets and documentation
+    getStartedCommand([]);
+  } else {
+    console.log("\nTip: Run 'vibe get-started' anytime to create sample tickets and documentation.");
+  }
 }
 
 export default initCommand;
