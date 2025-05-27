@@ -8,55 +8,9 @@ const args = process.argv.slice(2);
 const command = args[0];
 const targetFolder = args[1] || ".vibe";
 
-const configTemplate = `# VibeKit Configuration
-# Created: ${new Date().toISOString().split("T")[0]}
-
-project:
-  name: ""
-  description: ""
-
-tickets:
-  path: "${targetFolder}/tickets"
-  id_format: "TKT-{number}"
-  default_template: "${targetFolder}/.templates/default.md"
-  status_options:
-    - open
-    - in_progress
-    - review
-    - done
-  priority_options:
-    - low
-    - medium
-    - high
-    - critical
-
-ai:
-  enabled: true
-  provider: "openai"
-  model: "gpt-4"
-  context_window: 10
-
-ui:
-  theme: "default"
-  color_scheme: "dark"
-
-hooks:
-  pre_commit: false
-  post_checkout: false
-`;
-
-const ticketTemplate = `---
-id: TKT-XXX
-title: ""
-status: open
-priority: medium
-created_at: YYYY-MM-DD
----
-
-## Description
-
-<!-- Fill in the details of the task here -->
-`;
+// Use real files instead of hardcoded template strings
+const templateSrc = path.join(__dirname, "assets", "default.md");
+const configSrc = path.join(__dirname, "assets", "config.yml");
 
 if (command === "init") {
   if (fs.existsSync(targetFolder)) {
@@ -68,8 +22,9 @@ if (command === "init") {
   fs.mkdirSync(path.join(targetFolder, "tickets"), { recursive: true });
   fs.mkdirSync(path.join(targetFolder, ".templates"), { recursive: true });
 
-  fs.writeFileSync(path.join(targetFolder, "config.yml"), configTemplate);
-  fs.writeFileSync(path.join(targetFolder, ".templates", "default.md"), ticketTemplate);
+  // Copy files from assets directory instead of using hardcoded templates
+  fs.copyFileSync(configSrc, path.join(targetFolder, "config.yml"));
+  fs.copyFileSync(templateSrc, path.join(targetFolder, ".templates", "default.md"));
 
   console.log(`✅ '${targetFolder}' initialized with config, tickets/, and .templates/default.md`);
 } else {
@@ -121,4 +76,81 @@ if (command === "close") {
   }
 
   process.exit(0);
+}
+
+
+if (command === "new") {
+  // Parse arguments and flags
+  let titleArg = "";
+  let priority = "medium"; // Default priority
+  let status = "open";     // Default status
+  
+  // Process arguments to extract title and flags
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "--priority" && i + 1 < args.length) {
+      priority = args[i + 1];
+      i++; // Skip the next argument as it's the priority value
+    } else if (args[i] === "--status" && i + 1 < args.length) {
+      status = args[i + 1];
+      i++; // Skip the next argument as it's the status value
+    } else if (!args[i].startsWith("--")) {
+      // If not a flag, it's part of the title
+      titleArg += (titleArg ? " " : "") + args[i];
+    }
+  }
+  
+  if (!titleArg) {
+    console.error("❌ Please provide a title for the new ticket.");
+    process.exit(1);
+  }
+
+  const configPath = path.join(process.cwd(), ".vibe", "config.yml");
+  const templatePath = path.join(process.cwd(), ".vibe", ".templates", "default.md");
+
+  if (!fs.existsSync(configPath) || !fs.existsSync(templatePath)) {
+    console.error("❌ Missing config.yml or default.md template.");
+    process.exit(1);
+  }
+
+  const config = yaml.load(fs.readFileSync(configPath, "utf-8"));
+  const template = fs.readFileSync(templatePath, "utf-8");
+  const ticketDir = path.join(process.cwd(), config.tickets?.path || ".vibe/tickets");
+
+  const files = fs.readdirSync(ticketDir);
+  const ticketNumbers = files
+    .map(f => f.match(/^TKT-(\d+)/))
+    .filter(Boolean)
+    .map(match => parseInt(match[1], 10));
+  const nextId = Math.max(0, ...ticketNumbers) + 1;
+  const paddedId = String(nextId).padStart(3, "0");
+  const now = new Date().toISOString(); // Use full ISO timestamp
+
+  const ticketId = `TKT-${paddedId}`;
+  const slug = titleArg.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  const filename = `${ticketId}-${slug}.md`;
+  // Validate priority and status against config options if available
+  if (config.tickets?.priority_options && !config.tickets.priority_options.includes(priority)) {
+    console.warn(`⚠️  Priority '${priority}' not in config options. Using default.`);
+    priority = "medium";
+  }
+  
+  if (config.tickets?.status_options && !config.tickets.status_options.includes(status)) {
+    console.warn(`⚠️  Status '${status}' not in config options. Using default.`);
+    status = "open";
+  }
+  
+  // Replace template placeholders with actual values
+  let content = template
+    .replace(/{id}/g, paddedId)
+    .replace(/{title}/g, titleArg)
+    .replace(/{date}/g, now);
+    
+  // Replace priority and status in the frontmatter
+  content = content.replace(/^priority: .*$/m, `priority: ${priority}`);
+  content = content.replace(/^status: .*$/m, `status: ${status}`);
+
+  const outputPath = path.join(ticketDir, filename);
+  fs.writeFileSync(outputPath, content, "utf-8");
+
+  console.log(`✅ Created ticket: ${filename} (priority: ${priority}, status: ${status})`);
 }

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "files": ["index.js", "assets/"],
   "bin": {
     "vibe": "index.js"
   },

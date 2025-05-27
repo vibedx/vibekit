@@ -1,8 +1,0 @@
-# VibeKit User Configuration
-# Created: 2025-05-26
-# NOTE: This file should be added to .gitignore and NOT version-controlled.
-# It contains personal user information that should remain local to each developer's machine.
-
-# User information
-name: "" # Will be populated from git config during init
-email: "" # Will be populated from git config during init

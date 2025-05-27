@@ -1,9 +1,9 @@
 ---
 id: TKT-002
 title: Implement vibe close command
-status: open
+status: done
 priority: high
-created_at: 2025-05-27
+created_at: 2025-05-27T00:00:00.000Z
 ---
 
 ## Description
