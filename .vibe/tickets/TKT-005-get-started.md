@@ -1,10 +1,10 @@
 ---
 id: TKT-005
 title: "Onboarding: Implement `vibe new \"get started\"` guide"
-status: open
+status: done
 priority: high
 created_at: 2025-05-27T15:00:30.000Z
-updated_at: 2025-05-27T15:00:30.000Z
+updated_at: 2025-06-03T21:42:00.000Z
 ---
 
 ## Description  
