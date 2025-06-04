@@ -1,0 +1,36 @@
+# VibeKit Configuration
+# Created: 2025-05-27
+
+project:
+  name: ""
+  description: ""
+
+tickets:
+  path: ".vibe/tickets"
+  id_format: "TKT-{number}"
+  default_template: ".vibe/.templates/default.md"
+  use_status_folders: false
+  status_options:
+    - open
+    - in_progress
+    - review
+    - done
+  priority_options:
+    - low
+    - medium
+    - high
+    - critical
+
+ai:
+  enabled: true
+  provider: "openai"
+  model: "gpt-4"
+  context_window: 10
+
+ui:
+  theme: "default"
+  color_scheme: "dark"
+
+hooks:
+  pre_commit: false
+  post_checkout: false

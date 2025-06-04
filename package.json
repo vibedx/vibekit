@@ -1,14 +1,20 @@
 {
-  "name": "@vibedx/cli",
-  "version": "0.1.0",
-  "description": "🧩 VibeKit CLI — manage project tickets and context right inside your repo.",
+  "name": "nodejs-sandbox",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "files": ["index.js", "assets/"],
   "bin": {
-    "vibe": "./index.js"
+    "vibe": "index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node --watch index.js"
   },
-  "author": "Mani Yadav",
+  "keywords": [],
+  "author": "Ives van Hoorne",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
 }
