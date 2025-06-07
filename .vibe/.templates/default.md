@@ -1,6 +1,7 @@
 ---
 id: TKT-{id}
 title: {title}
+slug: {slug}
 status: open
 priority: medium
 created_at: {date}
@@ -18,6 +19,10 @@ updated_at: {date}
 ## Notes
 
 <!-- Any additional notes, references, or context that might be helpful. -->
+
+## Design / UX Considerations
+
+<!-- Add any design links (Figma, etc.) or UX considerations here. -->
 
 ## AI Prompt
 

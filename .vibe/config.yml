@@ -12,6 +12,9 @@ tickets:
   id_format: "TKT-{number}"
   default_template: ".vibe/.templates/default.md"
   use_status_folders: false
+  slug:
+    max_length: 30  # Maximum length of the slug
+    word_limit: 5   # Maximum number of words to include in the slug
   status_options:
     - open
     - in_progress
@@ -35,6 +38,11 @@ ui:
   theme: "default"
   color_scheme: "dark"
   
+# Git settings
+git:
+  branch_prefix: "feature/" # Optional prefix for branch names, e.g., "feature/"
+  default_base: "main" # Default base branch for new branches
+
 # Hooks
 hooks:
   pre_commit: false # Enable/disable pre-commit hook

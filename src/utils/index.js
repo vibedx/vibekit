@@ -69,12 +69,34 @@ function getNextTicketId() {
 }
 
 /**
- * Create a slug from a title
+ * Create a slug from a title based on configuration
  * @param {string} title The title to slugify
+ * @param {object} config Optional configuration object
  * @returns {string} The slugified title
  */
-function createSlug(title) {
-  return title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function createSlug(title, config = null) {
+  if (!title) return '';
+  
+  // Get configuration
+  const cfg = config || getConfig();
+  const maxLength = cfg.tickets?.slug?.max_length || 30;
+  const wordLimit = cfg.tickets?.slug?.word_limit || 5;
+  
+  // Split into words and limit the number of words
+  const words = title.split(/\s+/).filter(Boolean);
+  const limitedWords = words.slice(0, wordLimit).join(' ');
+  
+  // Create the basic slug
+  let slug = limitedWords.toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric chars with hyphens
+    .replace(/^-|-$/g, '');      // Remove leading/trailing hyphens
+  
+  // Limit the length
+  if (slug.length > maxLength) {
+    slug = slug.substring(0, maxLength).replace(/-+$/, '');
+  }
+  
+  return slug;
 }
 
 export {
