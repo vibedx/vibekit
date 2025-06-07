@@ -2,7 +2,7 @@
 id: TKT-006
 title: Add command to start work on a ticket and checkout its branch
 slug: TKT-006-add-command-to-start-work
-status: in_progress
+status: done
 priority: medium
 created_at: 2025-06-07T10:52:27.318Z
 updated_at: 2025-06-07T12:23:04.995Z
