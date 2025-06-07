@@ -52,8 +52,14 @@ function newCommand(args) {
   const paddedId = ticketId.replace("TKT-", "");
   const now = new Date().toISOString(); // Use full ISO timestamp
 
-  const slug = createSlug(titleArg);
-  const filename = `${ticketId}-${slug}.md`;
+  // Generate slug based on configuration for the filename
+  const simpleSlug = createSlug(titleArg, config);
+  
+  // Create the slug with the ticket ID
+  const ticketSlug = `${ticketId}-${simpleSlug}`;
+  
+  // Use the simple slug for the filename
+  const filename = `${ticketId}-${simpleSlug}.md`;
   
   // Validate priority and status against config options if available
   if (config.tickets?.priority_options && !config.tickets.priority_options.includes(priority)) {
@@ -70,6 +76,7 @@ function newCommand(args) {
   let content = template
     .replace(/{id}/g, paddedId)
     .replace(/{title}/g, titleArg)
+    .replace(/{slug}/g, ticketSlug)
     .replace(/{date}/g, now);
     
   // Replace priority and status in the frontmatter
