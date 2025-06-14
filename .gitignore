@@ -18,6 +18,9 @@ build/
 .env.local
 .env.*.local
 
+# Generated AI instructions
+.context/
+
 # IDE
 .idea/
 .vscode/
@@ -25,3 +28,6 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# AI
+CLAUDE.local.md

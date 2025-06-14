@@ -1,20 +1,14 @@
-# VibeKit Configuration
-# Created: 2025-05-26
-
-# Project settings
 project:
-  name: "vibekit" # Default to directory name, can be customized
-  description: "CLI tool for managing tickets, project context, and AI suggestions"
-  
-# Ticket settings
+  name: vibekit
+  description: CLI tool for managing tickets, project context, and AI suggestions
 tickets:
-  path: ".vibe/tickets"
-  id_format: "TKT-{number}"
-  default_template: ".vibe/.templates/default.md"
+  path: .vibe/tickets
+  id_format: TKT-{number}
+  default_template: .vibe/.templates/default.md
   use_status_folders: false
   slug:
-    max_length: 30  # Maximum length of the slug
-    word_limit: 5   # Maximum number of words to include in the slug
+    max_length: 30
+    word_limit: 5
   status_options:
     - open
     - in_progress
@@ -25,25 +19,12 @@ tickets:
     - medium
     - high
     - critical
-
-# AI integration settings
 ai:
   enabled: true
-  provider: "openai" # Default AI provider
-  model: "gpt-4" # Default model
-  context_window: 10 # Number of recent tickets to include in context
-
-# UI settings
-ui:
-  theme: "default"
-  color_scheme: "dark"
-  
-# Git settings
+  provider: claude-code
 git:
-  branch_prefix: "feature/" # Optional prefix for branch names, e.g., "feature/"
-  default_base: "main" # Default base branch for new branches
-
-# Hooks
+  branch_prefix: feature/
+  default_base: main
 hooks:
-  pre_commit: false # Enable/disable pre-commit hook
-  post_checkout: false # Enable/disable post-checkout hook
+  pre_commit: false
+  post_checkout: false

@@ -1,6 +1,7 @@
 ---
 id: TKT-{id}
 title: {title}
+slug: {slug}
 status: open
 priority: medium
 created_at: {date}
@@ -15,9 +16,21 @@ updated_at: {date}
 
 <!-- List the specific conditions that must be met for this ticket to be considered complete. -->
 
-## Notes
+## Code Quality
 
-<!-- Any additional notes, references, or context that might be helpful. -->
+<!-- List the specific conditions that must be met for this ticket to be considered complete. -->
+
+## Implementation Notes
+
+<!-- Technical details, references, or implementation context that might be helpful. -->
+
+## Design / UX Considerations
+
+<!-- Add any design links (Figma, etc.) or UX considerations here. -->
+
+## Testing & Test Cases
+
+<!-- Brief, focused test cases and verification steps. Keep concise. -->
 
 ## AI Prompt
 
