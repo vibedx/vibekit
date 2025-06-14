@@ -2,7 +2,7 @@
 id: TKT-007
 title: Add vibe link command for API key setup and AI provider configuration
 slug: TKT-007-add-vibe-link-command-for
-status: in_progress
+status: done
 priority: medium
 created_at: 2025-06-07T12:54:40.130Z
 updated_at: 2025-06-07T21:24:28.675Z
@@ -40,7 +40,6 @@ Interactive CLI prompts similar to `npm init`:
 $ vibe link
 ? Choose AI provider: 
   > Bring your own API key
-    VibeDX Pro [Coming Soon]
     
 ? Enter your Claude API key: [hidden]
 ✅ API key validated
