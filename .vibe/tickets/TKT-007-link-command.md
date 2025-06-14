@@ -13,9 +13,7 @@ updated_at: 2025-06-07T21:24:28.675Z
 Create a `vibe link` command that allows users to configure AI providers for ticket refinement. This command should:
 
 1. Set up API keys for different AI providers (Claude, OpenAI, etc.)
-2. Allow users to choose between:
-   - BYO API key (free)
-   - VibeDX Pro subscription (hosted service)
+2. Allow users to choose between different AI providers
 3. Store configuration securely for use by `vibe refine` command
 4. Validate API keys and test connection
 
