@@ -2,7 +2,7 @@
 id: TKT-008
 title: Add vibe refine command for AI-powered ticket enhancement
 slug: TKT-008-add-vibe-refine-command-for
-status: in_progress
+status: done
 priority: medium
 created_at: 2025-06-07T15:52:28.549Z
 updated_at: 2025-06-07T15:53:26.049Z
