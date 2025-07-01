@@ -2,10 +2,10 @@
 id: TKT-009
 title: Add Comprehensive CLI Command Testing with Automated Test Runs
 slug: TKT-009-add-comprehensive-command-testing-with-npm-run
-status: open
+status: done
 priority: medium
 created_at: 2025-06-14T19:34:31.633Z
-updated_at: 2025-06-14T19:36:20.855Z
+updated_at: 2025-06-14T21:00:22.935Z
 ---
 
 ## Description
@@ -14,7 +14,7 @@ Implement comprehensive test coverage for all CLI commands with automated test r
 
 ## Acceptance Criteria
 
-- Unit tests in `src/commands/__tests__` matching command structure
+- Unit tests in `src/commands/*/index.test.js` parallel to command structure
 - E2E tests in `tests/e2e` for command workflows
 - Test coverage >= 80% verified by Jest coverage reports
 - `npm run test` command configured and documented
@@ -60,3 +60,8 @@ Review and enhance test coverage while configuring automated test runs and maint
 ## Expected AI Output
 
 Complete test suite with Jest configuration, command coverage, and automated test runs
+
+## AI Workflow [Claude Code, Codex]
+
+<!-- NOTE (Do not remove) -->
+Always use `vibe start` to start working on this ticket and `vibe close` to close this ticket when done. Keep tickets up to date with implementation details and progress. Read .vibe/.context/aiworkflow directory for following vibekit cli workflow and follow the instructions to work on the tickets.
