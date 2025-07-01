@@ -13,7 +13,7 @@ const __dirname = dirname(__filename);
  * @param {string[]} args Command arguments
  */
 function initCommand(args) {
-  const targetFolder = args[0] || ".vibe";
+  const targetFolder = ".vibe";
   
   if (fs.existsSync(targetFolder)) {
     console.log(`⚠️  Folder '${targetFolder}' already exists. Skipping creation.`);

@@ -74,7 +74,7 @@ vibe start TKT-001
 ### 🏗️ Project Setup
 ```bash
 # Initialize VibeKit in your project
-vibe init [directory] [--with-samples|-s]
+vibe init [--with-samples|-s]
 
 # Get started with sample tickets and guide
 vibe get-started
