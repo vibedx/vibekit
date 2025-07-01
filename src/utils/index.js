@@ -175,9 +175,18 @@ function createFullSlug(ticketId, slugText) {
   return `${cleanTicketId}-${cleanSlugText}`;
 }
 
+/**
+ * Get the path to the config.yml file
+ * @returns {string} Absolute path to the config.yml file
+ */
+function getConfigPath() {
+  return path.join(process.cwd(), '.vibe', 'config.yml');
+}
+
 export {
   getTicketsDir,
   getConfig,
+  getConfigPath,
   getNextTicketId,
   createSlug,
   createFullSlug
