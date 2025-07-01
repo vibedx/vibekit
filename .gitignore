@@ -13,13 +13,16 @@ npm-debug.log*
 dist/
 build/
 
-# Environment variables
+# Testing
+__temp__/
+coverage/
+*.test.tmp
 .env
 .env.local
 .env.*.local
 
-# Generated AI instructions
-.context/
+# TODO: Soon to be removed
+.vibe/.context/.plans/
 
 # IDE
 .idea/
