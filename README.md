@@ -58,7 +58,7 @@ vibe start TKT-001
 ```
    🎯 Smart Ticket Management    📋 Interactive Lists & Filters
    🔗 Git Branch Integration     🤖 AI-Powered Enhancement (Claude Code / Codex)
-   📝 Customizable Templates     🚀 One-Command Workflows
+   📝 Customizable Templates     🔍 Quality Validation & Auto-Fix
 ```
 
 - **🎯 Smart Tickets**: Create, manage, and track development tickets with unique IDs
@@ -66,6 +66,7 @@ vibe start TKT-001
 - **🤖 AI Enhancement**: Claude Code integration for ticket refinement and content improvement
 - **📋 Interactive CLI**: Beautiful terminal interface with arrow navigation
 - **📝 Templates**: Customizable ticket templates for consistent workflows
+- **🔍 Quality Control**: Automated linting and validation with auto-fix capabilities
 - **🚀 Quick Actions**: One-command ticket creation, status updates, and more
 
 ## 📚 Commands Reference
@@ -110,6 +111,21 @@ vibe refine TKT-005 "focus on performance and error handling"
 
 # Disconnect AI integration
 vibe unlink
+```
+
+### 🔍 Quality & Validation
+```bash
+# Validate ticket documentation formatting
+vibe lint
+
+# Lint with detailed output including warnings
+vibe lint --verbose
+
+# Automatically fix missing frontmatter fields and sections
+vibe lint --fix
+
+# Lint a specific ticket file
+vibe lint TKT-001-example.md
 ```
 
 ## 🛠️ Usage Examples
@@ -181,6 +197,51 @@ Fix responsive layout issues in `src/components/Layout.jsx`
 - Update CSS Grid in `src/styles/layout.css` for mobile breakpoints
 - Add `useMediaQuery()` hook for responsive state management
 - Test on devices: iPhone SE, iPad, desktop (1920px+)
+```
+
+### Quality Control with Lint
+```bash
+# Check all tickets for formatting issues
+$ vibe lint
+🔍 VibeKit Ticket Linter Results
+
+❌ TKT-001-setup.md
+   Error: Missing required frontmatter field: slug
+   Error: Missing required section: ## Implementation Notes
+
+❌ TKT-003-responsive.md
+   Error: Invalid status "in-review". Must be one of: open, in_progress, review, done
+   Error: Section "## Testing & Test Cases" appears to be empty or too short
+
+✅ TKT-002-auth.md
+
+📊 Summary:
+   Files checked: 3
+   Files with issues: 2
+   Total errors: 4
+   Total warnings: 0
+
+💡 Fix the errors above to ensure consistent ticket formatting.
+💡 Use --fix flag to automatically fix missing sections.
+
+# Automatically fix missing fields and sections
+$ vibe lint --fix
+🔍 VibeKit Ticket Linter Results
+
+🔧 TKT-001-setup.md (FIXED)
+   Fixed: 1 missing frontmatter fields and 3 missing sections
+
+❌ TKT-003-responsive.md
+   Error: Invalid status "in-review". Must be one of: open, in_progress, review, done
+
+📊 Summary:
+   Files checked: 3
+   Files with issues: 1
+   Files fixed: 1
+   Total errors: 1
+   Total warnings: 1
+
+🎉 Most issues have been fixed! Please review and fix remaining errors manually.
 ```
 
 ## ⚙️ Configuration
