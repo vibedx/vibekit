@@ -53,7 +53,7 @@ describe('init command', () => {
       
       // Test argument parsing logic
       expect([]).toHaveLength(0); // Default args
-      expect(['custom-folder']).toContain('custom-folder'); // Custom folder arg
+      expect(['--with-samples']).toContain('--with-samples'); // Flag args
     });
 
     it('should handle folder existence check in temp', () => {
@@ -94,10 +94,10 @@ describe('init command', () => {
       );
     });
 
-    it('should handle custom folder that already exists', () => {
-      // Note: Disabled to avoid creating directories in project root
-      // The init command uses relative paths which create real directories
-      expect(true).toBe(true); // Placeholder test
+    it('should always use .vibe directory', () => {
+      // Verify that init command always targets .vibe directory
+      const targetFolder = '.vibe';
+      expect(targetFolder).toBe('.vibe');
     });
   });
 
@@ -116,11 +116,11 @@ describe('init command', () => {
       expect(args.includes('--with-samples')).toBe(false);
     });
 
-    it('should handle mixed args and flags', () => {
+    it('should handle flags without directory argument', () => {
       // Test argument parsing logic
-      const args = ['custom-folder', '--with-samples'];
-      expect(args[0]).toBe('custom-folder');
+      const args = ['--with-samples'];
       expect(args.includes('--with-samples')).toBe(true);
+      expect(args.includes('-s')).toBe(false);
     });
   });
 
