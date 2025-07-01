@@ -2,7 +2,7 @@
 id: TKT-010
 title: Add Lint Command to Validate Ticket Documentation Formatting
 slug: TKT-010-add-lint-command-to-validate-tickets
-status: in_progress
+status: done
 priority: medium
 created_at: 2025-07-01T21:46:03.461Z
 updated_at: 2025-07-01T22:17:44.215Z

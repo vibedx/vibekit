@@ -152,15 +152,17 @@ function validateFrontmatter(frontmatter, filename, config, requiredFields) {
  * Validate ticket content sections
  * @param {string} content - Ticket content (without frontmatter)
  * @param {string[]} requiredSections - Required section headers
- * @returns {string[]} Array of validation errors
+ * @returns {Object} Object with errors and missing sections
  */
 function validateSections(content, requiredSections) {
   const errors = [];
+  const missingSections = [];
   
   for (const section of requiredSections) {
     const sectionRegex = new RegExp(`^##\\s+${section}`, 'm');
     if (!sectionRegex.test(content)) {
       errors.push(`Missing required section: ## ${section}`);
+      missingSections.push(section);
     }
   }
 
@@ -176,7 +178,167 @@ function validateSections(content, requiredSections) {
     }
   }
 
-  return errors;
+  return { errors, missingSections };
+}
+
+/**
+ * Extract section content from template
+ * @param {Object} config - Configuration object
+ * @returns {Object} Object mapping section names to their default content
+ */
+function getSectionDefaults(config) {
+  const templatePath = config.tickets?.default_template || '.vibe/.templates/default.md';
+  const fullTemplatePath = path.resolve(templatePath);
+  
+  const sectionDefaults = {};
+  
+  if (!fs.existsSync(fullTemplatePath)) {
+    return sectionDefaults;
+  }
+  
+  try {
+    const templateContent = fs.readFileSync(fullTemplatePath, 'utf-8');
+    
+    // Split by frontmatter to get only content part
+    const parts = templateContent.split('---');
+    if (parts.length < 3) {
+      return sectionDefaults;
+    }
+    
+    const contentPart = parts.slice(2).join('---');
+    
+    // Split content by section headers
+    const sections = contentPart.split(/^##\s+/m);
+    
+    // First element is content before any section headers (ignore)
+    for (let i = 1; i < sections.length; i++) {
+      const section = sections[i];
+      const lines = section.split('\n');
+      const sectionName = lines[0].trim();
+      const sectionContent = lines.slice(1).join('\n');
+      
+      sectionDefaults[sectionName] = sectionContent;
+    }
+  } catch (error) {
+    console.error(`❌ Failed to read template for section defaults: ${error.message}`);
+  }
+  
+  return sectionDefaults;
+}
+
+/**
+ * Get frontmatter defaults from template
+ * @param {Object} config - Configuration object
+ * @returns {Object} Object with default frontmatter values
+ */
+function getFrontmatterDefaults(config) {
+  const templatePath = config.tickets?.default_template || '.vibe/.templates/default.md';
+  const fullTemplatePath = path.resolve(templatePath);
+  
+  const defaults = {};
+  
+  if (!fs.existsSync(fullTemplatePath)) {
+    return defaults;
+  }
+  
+  try {
+    const templateContent = fs.readFileSync(fullTemplatePath, 'utf-8');
+    
+    if (!templateContent.startsWith('---')) {
+      return defaults;
+    }
+    
+    const parts = templateContent.split('---');
+    if (parts.length < 3) {
+      return defaults;
+    }
+    
+    const frontmatter = yaml.load(parts[1]);
+    return frontmatter || {};
+  } catch (error) {
+    console.error(`❌ Failed to read template for frontmatter defaults: ${error.message}`);
+  }
+  
+  return defaults;
+}
+
+/**
+ * Fix missing frontmatter fields
+ * @param {Object} frontmatter - Current frontmatter object
+ * @param {string[]} missingFields - Array of missing field names
+ * @param {Object} config - Configuration object
+ * @param {string} filename - Filename for generating values
+ * @returns {Object} Fixed frontmatter object
+ */
+function fixMissingFrontmatter(frontmatter, missingFields, config, filename) {
+  const fixedFrontmatter = { ...frontmatter };
+  const defaults = getFrontmatterDefaults(config);
+  const currentDate = new Date().toISOString();
+  
+  for (const field of missingFields) {
+    if (field === 'slug') {
+      // Generate slug from title or filename
+      const title = fixedFrontmatter.title || filename.replace('.md', '').replace(/^TKT-\d+-/, '');
+      fixedFrontmatter.slug = fixedFrontmatter.id ? 
+        `${fixedFrontmatter.id}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}` : 
+        title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    } else if (field === 'created_at' || field === 'updated_at') {
+      fixedFrontmatter[field] = currentDate;
+    } else if (defaults[field] !== undefined) {
+      // Use template default if available
+      fixedFrontmatter[field] = defaults[field];
+    } else {
+      // Provide sensible defaults for common fields
+      switch (field) {
+        case 'status':
+          fixedFrontmatter[field] = config.tickets?.status_options?.[0] || 'open';
+          break;
+        case 'priority':
+          fixedFrontmatter[field] = 'medium';
+          break;
+        case 'title':
+          fixedFrontmatter[field] = filename.replace('.md', '').replace(/^TKT-\d+-/, '').replace(/-/g, ' ');
+          break;
+        case 'id':
+          const match = filename.match(/^(TKT-\d+)/);
+          if (match) {
+            fixedFrontmatter[field] = match[1];
+          }
+          break;
+        default:
+          fixedFrontmatter[field] = '';
+      }
+    }
+  }
+  
+  return fixedFrontmatter;
+}
+
+/**
+ * Fix missing sections in ticket content
+ * @param {string} content - Original ticket content
+ * @param {string[]} missingSections - Array of missing section names
+ * @param {Object} config - Configuration object
+ * @returns {string} Fixed content with added sections
+ */
+function fixMissingSections(content, missingSections, config) {
+  let fixedContent = content;
+  
+  // Ensure content ends with newline for proper section spacing
+  if (fixedContent && !fixedContent.endsWith('\n')) {
+    fixedContent += '\n';
+  }
+  
+  // Get section defaults from template
+  const sectionDefaults = getSectionDefaults(config);
+  
+  // Add missing sections at the end
+  for (const section of missingSections) {
+    const defaultContent = sectionDefaults[section] || '\nTODO: Add content for this section\n';
+    fixedContent += `\n## ${section}${defaultContent}`;
+  }
+
+  return fixedContent;
 }
 
 /**
@@ -185,14 +347,17 @@ function validateSections(content, requiredSections) {
  * @param {Object} config - Configuration object
  * @param {string[]} requiredFields - Required frontmatter fields
  * @param {string[]} requiredSections - Required section headers
- * @returns {Object} Validation result with errors and warnings
+ * @param {boolean} fixMode - Whether to fix issues automatically
+ * @returns {Object} Validation result with errors, warnings, and fixes
  */
-function validateTicketFile(filePath, config, requiredFields, requiredSections) {
+function validateTicketFile(filePath, config, requiredFields, requiredSections, fixMode = false) {
   const filename = path.basename(filePath);
   const result = {
     filename,
     errors: [],
-    warnings: []
+    warnings: [],
+    fixed: false,
+    missingSections: []
   };
 
   try {
@@ -226,8 +391,69 @@ function validateTicketFile(filePath, config, requiredFields, requiredSections) 
 
     // Validate content sections
     const ticketContent = parts.slice(2).join('---');
-    const sectionErrors = validateSections(ticketContent, requiredSections);
-    result.errors.push(...sectionErrors);
+    const sectionValidation = validateSections(ticketContent, requiredSections);
+    result.errors.push(...sectionValidation.errors);
+    result.missingSections = sectionValidation.missingSections;
+
+    // Identify missing frontmatter fields for fixing
+    const missingFrontmatterFields = [];
+    for (const field of requiredFields) {
+      if (!frontmatter[field]) {
+        missingFrontmatterFields.push(field);
+      }
+    }
+
+    // Apply fixes if in fix mode
+    if (fixMode && (result.missingSections.length > 0 || missingFrontmatterFields.length > 0)) {
+      let fixedFrontmatter = frontmatter;
+      let fixedContent = ticketContent;
+      let fixedCount = 0;
+
+      // Fix missing frontmatter fields
+      if (missingFrontmatterFields.length > 0) {
+        fixedFrontmatter = fixMissingFrontmatter(frontmatter, missingFrontmatterFields, config, filename);
+        fixedCount += missingFrontmatterFields.length;
+      }
+
+      // Fix missing sections
+      if (result.missingSections.length > 0) {
+        fixedContent = fixMissingSections(ticketContent, result.missingSections, config);
+        fixedCount += result.missingSections.length;
+      }
+
+      // Write the fixed content
+      if (fixedCount > 0) {
+        const fixedFrontmatterYaml = yaml.dump(fixedFrontmatter, { 
+          defaultStyle: null, 
+          quotingType: '"',
+          forceQuotes: false
+        });
+        const newFileContent = '---\n' + fixedFrontmatterYaml + '---' + fixedContent;
+        
+        try {
+          fs.writeFileSync(filePath, newFileContent, 'utf-8');
+          result.fixed = true;
+          
+          // Remove the errors that were fixed
+          result.errors = result.errors.filter(error => 
+            !error.startsWith('Missing required section:') &&
+            !error.startsWith('Missing required frontmatter field:')
+          );
+          
+          // Add success message for fixes
+          const messages = [];
+          if (missingFrontmatterFields.length > 0) {
+            messages.push(`${missingFrontmatterFields.length} missing frontmatter fields`);
+          }
+          if (result.missingSections.length > 0) {
+            messages.push(`${result.missingSections.length} missing sections`);
+          }
+          result.warnings.push(`Fixed ${messages.join(' and ')}`);
+        } catch (error) {
+          result.errors.push(`Failed to write fixes: ${error.message}`);
+        }
+      }
+    }
 
     // Add warnings for common issues
     if (ticketContent.includes('TODO') || ticketContent.includes('FIXME')) {
@@ -249,39 +475,52 @@ function validateTicketFile(filePath, config, requiredFields, requiredSections) 
  * Format validation results for display
  * @param {Object[]} results - Array of validation results
  * @param {boolean} verbose - Show warnings and details
+ * @param {boolean} fixMode - Whether fixes were applied
  */
-function displayResults(results, verbose = false) {
+function displayResults(results, verbose = false, fixMode = false) {
   let totalErrors = 0;
   let totalWarnings = 0;
   let filesWithIssues = 0;
+  let filesFixed = 0;
 
   console.log('🔍 VibeKit Ticket Linter Results\n');
 
   for (const result of results) {
     const hasErrors = result.errors.length > 0;
     const hasWarnings = result.warnings.length > 0;
+    const wasFixed = result.fixed;
+
+    if (wasFixed) {
+      filesFixed++;
+      console.log(`🔧 ${result.filename} (FIXED)`);
+      if (verbose || fixMode) {
+        result.warnings.forEach(warning => {
+          console.log(`   Fixed: ${warning}`);
+        });
+      }
+    }
 
     if (hasErrors || hasWarnings) {
-      filesWithIssues++;
+      if (!wasFixed) filesWithIssues++;
       
       if (hasErrors) {
-        console.log(`❌ ${result.filename}`);
+        if (!wasFixed) console.log(`❌ ${result.filename}`);
         result.errors.forEach(error => {
           console.log(`   Error: ${error}`);
         });
         totalErrors += result.errors.length;
-      } else {
+      } else if (!wasFixed) {
         console.log(`⚠️  ${result.filename}`);
       }
 
-      if (verbose && hasWarnings) {
+      if ((verbose || fixMode) && hasWarnings && !wasFixed) {
         result.warnings.forEach(warning => {
           console.log(`   Warning: ${warning}`);
         });
       }
       totalWarnings += result.warnings.length;
       console.log('');
-    } else if (verbose) {
+    } else if (verbose && !wasFixed) {
       console.log(`✅ ${result.filename}`);
     }
   }
@@ -290,13 +529,25 @@ function displayResults(results, verbose = false) {
   console.log(`\n📊 Summary:`);
   console.log(`   Files checked: ${results.length}`);
   console.log(`   Files with issues: ${filesWithIssues}`);
+  if (filesFixed > 0) {
+    console.log(`   Files fixed: ${filesFixed}`);
+  }
   console.log(`   Total errors: ${totalErrors}`);
   console.log(`   Total warnings: ${totalWarnings}`);
 
   if (totalErrors === 0) {
-    console.log('\n🎉 All tickets are properly formatted!');
+    if (filesFixed > 0) {
+      console.log('\n🎉 All issues have been fixed! Tickets are now properly formatted.');
+    } else {
+      console.log('\n🎉 All tickets are properly formatted!');
+    }
   } else {
-    console.log('\n💡 Fix the errors above to ensure consistent ticket formatting.');
+    if (fixMode) {
+      console.log('\n💡 Some errors could not be automatically fixed. Please review and fix manually.');
+    } else {
+      console.log('\n💡 Fix the errors above to ensure consistent ticket formatting.');
+      console.log('💡 Use --fix flag to automatically fix missing sections.');
+    }
   }
 }
 
@@ -306,12 +557,15 @@ function displayResults(results, verbose = false) {
  */
 function lintCommand(args) {
   let verbose = false;
+  let fixMode = false;
   let specificFile = null;
 
   // Parse arguments first to check for help
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--verbose' || args[i] === '-v') {
       verbose = true;
+    } else if (args[i] === '--fix') {
+      fixMode = true;
     } else if (args[i] === '--help' || args[i] === '-h') {
       console.log(`
 🔍 vibe lint - Validate ticket documentation formatting
@@ -321,11 +575,13 @@ Usage:
 
 Options:
   --verbose, -v    Show detailed output including warnings
+  --fix            Automatically fix missing sections using template defaults
   --help, -h       Show this help message
 
 Examples:
   vibe lint                           # Lint all tickets
   vibe lint --verbose                 # Show detailed output
+  vibe lint --fix                     # Lint and auto-fix missing sections
   vibe lint TKT-001-example.md        # Lint specific file
 
 Validation Rules:
@@ -387,11 +643,11 @@ Validation Rules:
 
   // Validate all files
   const results = filesToCheck.map(filePath => 
-    validateTicketFile(filePath, config, requiredFields, requiredSections)
+    validateTicketFile(filePath, config, requiredFields, requiredSections, fixMode)
   );
   
   // Display results
-  displayResults(results, verbose);
+  displayResults(results, verbose, fixMode);
   
   // Exit with error code if there are errors
   const hasErrors = results.some(result => result.errors.length > 0);
