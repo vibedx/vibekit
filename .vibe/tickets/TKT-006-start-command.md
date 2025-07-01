@@ -38,3 +38,18 @@ Implement a CLI command for starting work on a ticket as described above. Ensure
 ## Expected AI Output
 
 Source code for the CLI command, with example usage and output. Include configuration handling for branch naming patterns. Integration with the ticketing system API is optional.
+## Code Quality
+<!-- List the specific conditions that must be met for this ticket to be considered complete. -->
+
+
+## Implementation Notes
+<!-- Technical details, references, or implementation context that might be helpful. -->
+
+
+## Testing & Test Cases
+<!-- Brief, focused test cases and verification steps. Keep concise. -->
+
+
+## AI Workflow
+<!-- NOTE (Do not remove) -->
+Always use `vibe start` to start working on this ticket and `vibe close` to close this ticket when done. Keep tickets up to date with implementation details and progress. Read .vibe/.context/aiworkflow directory for following vibekit cli workflow and follow the instructions to work on the tickets.
