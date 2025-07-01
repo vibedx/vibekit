@@ -62,14 +62,14 @@ describe('lint command', () => {
   });
 
   describe('directory validation', () => {
-    it('should exit with error when tickets directory does not exist', () => {
+    it('should exit with error when configuration file does not exist', () => {
       // Act
       expect(() => lintCommand([])).toThrow('process.exit(1)');
 
       // Assert
       expect(exitMock.exitCalls).toContain(1);
       expect(consoleMock.logs.error.some(error => 
-        error.includes('Tickets directory not found')
+        error.includes('Configuration file not found')
       )).toBe(true);
     });
 
@@ -97,37 +97,41 @@ describe('lint command', () => {
         priority: 'medium',
         created_at: '2025-01-01T12:00:00.000Z',
         updated_at: '2025-01-01T12:00:00.000Z',
-        description: 'Test description',
-        acceptanceCriteria: `- [ ] Valid criteria
-- [ ] Another criteria
+        description: `## Description
+
+This is a test description with enough content to pass validation.
+
+## Acceptance Criteria
+
+This section has sufficient content for validation purposes.
 
 ## Code Quality
 
-Follow good practices
+This section contains adequate content for testing validation logic.
 
 ## Implementation Notes
 
-Technical details here
+This section provides enough details for the validation system.
 
 ## Design / UX Considerations
 
-UX considerations here
+This section includes sufficient UX considerations for testing.
 
 ## Testing & Test Cases
 
-Test cases here
+This section contains adequate test case information.
 
 ## AI Prompt
 
-AI instructions here
+This section provides sufficient AI prompt content for testing.
 
 ## Expected AI Output
 
-Expected output here
+This section contains enough information about expected output.
 
 ## AI Workflow
 
-Workflow instructions here`
+This section has adequate workflow information for validation.`
       };
 
       createMockVibeProject(tempDir, { withTickets: [validTicket] });
@@ -147,22 +151,42 @@ Workflow instructions here`
       const invalidTicket = {
         id: 'TKT-001',
         title: 'Test ticket',
-        // Missing slug, status, priority, dates
-        description: 'Test description with all required sections',
-        acceptanceCriteria: `## Code Quality
-Test
+        // Missing slug, status, priority, created_at, updated_at
+        description: `## Description
+
+This ticket has missing frontmatter fields for testing validation.
+
+## Acceptance Criteria
+
+This section has sufficient content for validation purposes.
+
+## Code Quality
+
+This section contains adequate content for testing validation logic.
+
 ## Implementation Notes  
-Test
+
+This section provides enough details for the validation system.
+
 ## Design / UX Considerations
-Test
+
+This section includes sufficient UX considerations for testing.
+
 ## Testing & Test Cases
-Test
+
+This section contains adequate test case information.
+
 ## AI Prompt
-Test
+
+This section provides sufficient AI prompt content for testing.
+
 ## Expected AI Output
-Test
+
+This section contains enough information about expected output.
+
 ## AI Workflow
-Test`
+
+This section has adequate workflow information for validation.`
       };
 
       createMockVibeProject(tempDir, { withTickets: [invalidTicket] });
@@ -173,7 +197,7 @@ Test`
       // Assert
       expect(exitMock.exitCalls).toContain(1);
       expect(consoleMock.logs.log.some(log => 
-        log.includes('Missing required frontmatter field: slug')
+        log.includes('Error: Missing required frontmatter field: slug')
       )).toBe(true);
     });
 
@@ -373,21 +397,41 @@ Test`;
         priority: 'medium',
         created_at: '2025-01-01T12:00:00.000Z',
         updated_at: '2025-01-01T12:00:00.000Z',
-        description: 'Test',
-        acceptanceCriteria: `## Code Quality
-Test
+        description: `## Description
+
+This is a test description with enough content to pass validation.
+
+## Acceptance Criteria
+
+This section has sufficient content for validation purposes.
+
+## Code Quality
+
+This section contains adequate content for testing validation logic.
+
 ## Implementation Notes  
-Test
+
+This section provides enough details for the validation system.
+
 ## Design / UX Considerations
-Test
+
+This section includes sufficient UX considerations for testing.
+
 ## Testing & Test Cases
-Test
+
+This section contains adequate test case information.
+
 ## AI Prompt
-Test
+
+This section provides sufficient AI prompt content for testing.
+
 ## Expected AI Output
-Test
+
+This section contains enough information about expected output.
+
 ## AI Workflow
-Test`
+
+This section has adequate workflow information for validation.`
       };
 
       const mockProject = createMockVibeProject(tempDir, { withTickets: [validTicket] });
@@ -426,21 +470,41 @@ Test`
         priority: 'medium',
         created_at: '2025-01-01T12:00:00.000Z',
         updated_at: '2025-01-01T12:00:00.000Z',
-        description: 'Test',
-        acceptanceCriteria: `## Code Quality
-Test
+        description: `## Description
+
+This is a test description with enough content to pass validation.
+
+## Acceptance Criteria
+
+This section has sufficient content for validation purposes.
+
+## Code Quality
+
+This section contains adequate content for testing validation logic.
+
 ## Implementation Notes  
-Test
+
+This section provides enough details for the validation system.
+
 ## Design / UX Considerations
-Test
+
+This section includes sufficient UX considerations for testing.
+
 ## Testing & Test Cases
-Test
+
+This section contains adequate test case information.
+
 ## AI Prompt
-Test
+
+This section provides sufficient AI prompt content for testing.
+
 ## Expected AI Output
-Test
+
+This section contains enough information about expected output.
+
 ## AI Workflow
-Test`
+
+This section has adequate workflow information for validation.`
       };
 
       createMockVibeProject(tempDir, { withTickets: [validTicket] });

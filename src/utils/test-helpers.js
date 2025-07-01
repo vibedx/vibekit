@@ -211,26 +211,26 @@ Always use \`vibe start\` to start working on this ticket and \`vibe close\` to 
   // Create mock tickets
   withTickets.forEach((ticket, index) => {
     const ticketId = ticket.id || `TKT-${String(index + 1).padStart(3, '0')}`;
-    const filename = `${ticketId}-${ticket.slug || 'test-ticket'}.md`;
+    const filename = `${ticketId}-${ticket.slug || ticket.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'test-ticket'}.md`;
     const ticketPath = path.join(ticketsDir, filename);
     
+    // Build frontmatter with only provided fields
+    const frontmatterLines = [];
+    if (ticket.id !== undefined) frontmatterLines.push(`id: ${ticket.id}`);
+    if (ticket.title !== undefined) frontmatterLines.push(`title: ${ticket.title}`);
+    if (ticket.slug !== undefined) frontmatterLines.push(`slug: ${ticket.slug}`);
+    if (ticket.status !== undefined) frontmatterLines.push(`status: ${ticket.status}`);
+    if (ticket.priority !== undefined) frontmatterLines.push(`priority: ${ticket.priority}`);
+    if (ticket.created_at !== undefined) frontmatterLines.push(`created_at: ${ticket.created_at}`);
+    if (ticket.updated_at !== undefined) frontmatterLines.push(`updated_at: ${ticket.updated_at}`);
+    
+    const frontmatter = frontmatterLines.length > 0 ? frontmatterLines.join('\n') : '';
+    
     const ticketContent = `---
-id: ${ticketId}
-title: ${ticket.title || 'Test Ticket'}
-slug: ${ticket.slug || 'test-ticket'}
-status: ${ticket.status || 'open'}
-priority: ${ticket.priority || 'medium'}
-created_at: ${ticket.created_at || new Date().toISOString()}
-updated_at: ${ticket.updated_at || new Date().toISOString()}
+${frontmatter}
 ---
 
-## Description
-
 ${ticket.description || 'Test ticket description'}
-
-## Acceptance Criteria
-
-${ticket.acceptanceCriteria || '- [ ] Test criteria'}
 `;
     
     fs.writeFileSync(ticketPath, ticketContent, 'utf-8');
