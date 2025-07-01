@@ -10,6 +10,10 @@
   },
   "scripts": {
     "start": "node --watch index.js",
+    "test": "npm run test:cleanup && NODE_OPTIONS='--experimental-vm-modules' jest --detectOpenHandles",
+    "test:watch": "NODE_OPTIONS='--experimental-vm-modules' jest --watch",
+    "test:coverage": "NODE_OPTIONS='--experimental-vm-modules' jest --coverage --detectOpenHandles",
+    "test:cleanup": "rm -rf __temp__",
     "prepublishOnly": "echo 'Ready to publish'",
     "version": "git add -A && git commit -m 'chore: version bump'",
     "postversion": "git push && git push --tags"
@@ -27,6 +31,42 @@
   "homepage": "https://github.com/vibedx/vibekit#readme",
   "dependencies": {
     "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@jest/globals": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "globals": {
+      "__DEV__": true
+    },
+    "testMatch": [
+      "**/src/**/*.test.js",
+      "**/__tests__/**/*.test.js",
+      "**/tests/**/*.test.js"
+    ],
+    "collectCoverage": true,
+    "coverageDirectory": "coverage",
+    "forceExit": true,
+    "coverageReporters": ["text", "lcov", "html"],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "index.js",
+      "!src/utils/cli.test.js",
+      "!src/**/*.test.js",
+      "!**/__tests__/**",
+      "!**/__temp__/**",
+      "!**/node_modules/**"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 13,
+        "functions": 20,
+        "lines": 14,
+        "statements": 14
+      }
+    }
   },
   "engines": {
     "node": ">=18.0.0"
