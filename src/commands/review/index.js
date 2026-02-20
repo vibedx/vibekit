@@ -640,10 +640,10 @@ function copyToClipboard(text, ticketId) {
   }
 
   // Fallback: save to cache file
-  const cacheDir = `.vibe/.cache/review/logs/${ticketId}`;
+  const cacheDir = path.join(process.cwd(), `.vibe/.cache/review/logs/${ticketId}`);
   fs.mkdirSync(cacheDir, { recursive: true });
-  
-  const gitignorePath = '.vibe/.cache/.gitignore';
+
+  const gitignorePath = path.join(process.cwd(), '.vibe/.cache/.gitignore');
   if (!fs.existsSync(gitignorePath)) {
     fs.writeFileSync(gitignorePath, '*\n!.gitignore\n');
   }
@@ -702,7 +702,7 @@ function cleanupEmptyDirs(dirPath) {
  * cleanReviewFiles(['11']); // Clean TKT-011 cache files (auto-normalized)
  */
 function cleanReviewFiles(args) {
-  const cacheBasePath = '.vibe/.cache/review';
+  const cacheBasePath = path.join(process.cwd(), '.vibe/.cache/review');
   
   if (!fs.existsSync(cacheBasePath)) {
     console.log(chalk.green('✅ No review cache files to clean'));
