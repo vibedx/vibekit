@@ -24,6 +24,9 @@ coverage/
 # TODO: Soon to be removed
 .vibe/.context/.plans/
 
+# Cache files
+.vibe/.cache/
+
 # IDE
 .idea/
 .vscode/

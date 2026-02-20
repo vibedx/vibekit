@@ -2,10 +2,10 @@
 id: TKT-011
 title: Implement Ticket Review Command for Git Diff Comparison
 slug: TKT-011-implement-ticket-review-diff-command
-status: open
+status: done
 priority: medium
 created_at: 2025-07-01T22:28:03.926Z
-updated_at: 2025-07-01T22:31:31.820Z
+updated_at: 2025-07-02T21:51:47.148Z
 ---
 
 ## Description
@@ -20,6 +20,7 @@ Implement `vibe review <ticket-id>` command to compare codebase state changes be
 4. Display meaningful errors for: invalid ticket format, nonexistent ticket, missing git history
 5. Handle both closed tickets (diff from closure) and in-progress tickets (diff from start)
 6. Support --no-color flag for CI environments
+7. We dont need real Claude API integration, Claude Code CLI should be used to generate the review
 
 ## Code Quality
 
@@ -66,7 +67,5 @@ Complete review command implementation in `src/commands/review` with error handl
 
 ## AI Workflow
 
-1. Use `vibe start` to begin implementation
-2. Update ticket with progress
-3. Test command functionality
-4. Use `vibe close` upon completion
+<!-- NOTE (Do not remove) -->
+Always use `vibe start` to start working on this ticket and `vibe close` to close this ticket when done. Keep tickets up to date with implementation details and progress. Read .vibe/.context/aiworkflow directory for following vibekit cli workflow and follow the instructions to work on the tickets.
