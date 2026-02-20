@@ -111,7 +111,7 @@ function assertFileExists(filePath) {
 function setupWorkspace() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'vibekit-e2e-'));
 
-  git(['init'], dir);
+  git(['-c', 'init.defaultBranch=main', 'init'], dir);
   git(['config', 'user.email', 'e2e@vibekit.test'], dir);
   git(['config', 'user.name', 'VibeKit E2E'], dir);
   git(['commit', '--allow-empty', '-m', 'init'], dir);
@@ -224,6 +224,10 @@ try {
     assertExitCode(r, 0);
     assertContains(r, 'Files checked');
   });
+
+  // Commit all vibe files so the repo is clean before vibe start
+  git(['add', '-A'], tmpDir);
+  git(['commit', '-m', 'chore: vibe project files'], tmpDir);
 
   test('vibe start TKT-001', () => {
     const r = run(['start', 'TKT-001'], { cwd: tmpDir });
