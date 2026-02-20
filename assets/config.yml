@@ -28,3 +28,8 @@ ai:
 hooks:
   pre_commit: false
   post_checkout: false
+
+review:
+  acceptance_threshold: 80
+  good_threshold: 80
+  warning_threshold: 60

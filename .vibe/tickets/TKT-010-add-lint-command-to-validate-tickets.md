@@ -65,4 +65,5 @@ Working lint command implementation with tests, following project patterns and m
 
 ## AI Workflow
 
+<!-- NOTE (Do not remove) -->
 Always use `vibe start` to start working on this ticket and `vibe close` to close this ticket when done. Keep tickets up to date with implementation details and progress. Read .vibe/.context/aiworkflow directory for following vibekit cli workflow and follow the instructions to work on the tickets.
