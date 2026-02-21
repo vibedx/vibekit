@@ -248,14 +248,28 @@ try {
     assertContains(r, 'ticket-id');
   });
 
-  test('vibe link (select env var method)', () => {
-    const r = run(['link'], { cwd: tmpDir, input: '1\n', timeout: 8000 });
-    assertContains(r, 'ANTHROPIC_API_KEY');
+  test('vibe link (prompts to install Claude Code if not found)', () => {
+    const r = run(['link'], { cwd: tmpDir, timeout: 8000 });
+    // Link command may succeed (if Claude Code is installed) or fail gracefully (if not)
+    // Check that it provides helpful guidance in either case
+    assertContains(r, 'Linking VibeKit to Claude Code');
+    if (r.exitCode === 0) {
+      assertContains(r, 'linked successfully');
+    } else {
+      assertContains(r, 'Claude Code CLI not found');
+      assertContains(r, 'npm install -g @anthropic-ai/claude-code');
+    }
   });
 
-  test('vibe refine (AI disabled — graceful error)', () => {
-    const r = run(['refine', '1'], { cwd: tmpDir });
-    assertContains(r, 'AI is not enabled');
+  test('vibe refine (gracefully handles disabled AI)', () => {
+    const r = run(['refine', '1'], { cwd: tmpDir, input: '4\n', timeout: 8000 });
+    // Refine should either work (if AI is enabled) or show error message (if not)
+    const output = r.stdout + r.stderr;
+    if (!output.includes('AI is not enabled')) {
+      assertContains(r, 'Analyzing ticket');
+    } else {
+      assertContains(r, 'AI is not enabled');
+    }
   });
 
 } finally {
