@@ -248,14 +248,17 @@ try {
     assertContains(r, 'ticket-id');
   });
 
-  test('vibe link (select env var method)', () => {
-    const r = run(['link'], { cwd: tmpDir, input: '1\n', timeout: 8000 });
-    assertContains(r, 'ANTHROPIC_API_KEY');
+  test('vibe link (detects Claude Code CLI)', () => {
+    const r = run(['link'], { cwd: tmpDir, timeout: 8000 });
+    assertExitCode(r, 0);
+    assertContains(r, 'Claude Code detected');
+    assertContains(r, 'linked successfully');
   });
 
-  test('vibe refine (AI disabled — graceful error)', () => {
-    const r = run(['refine', '1'], { cwd: tmpDir });
-    assertContains(r, 'AI is not enabled');
+  test('vibe refine (AI enabled and available)', () => {
+    const r = run(['refine', '1'], { cwd: tmpDir, input: '4\n', timeout: 8000 });
+    // Should proceed to refinement UI without "AI is not enabled" error
+    assertContains(r, 'Analyzing ticket');
   });
 
 } finally {
