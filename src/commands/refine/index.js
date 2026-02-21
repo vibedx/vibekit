@@ -1,13 +1,10 @@
 import fs from 'fs';
 import path from 'path';
+import { spawn } from 'child_process';
 import yaml from 'js-yaml';
 import { resolveTicketId, parseTicket, updateTicket } from '../../utils/ticket.js';
 import { select, spinner, input, logger } from '../../utils/cli.js';
 import { arrowSelect } from '../../utils/arrow-select.js';
-
-// Configuration constants
-const CLAUDE_SDK_TIMEOUT = 30000;
-const ENHANCEMENT_MODEL = 'claude-3-5-sonnet-latest';
 
 /**
  * Load VibeKit configuration
@@ -36,92 +33,20 @@ function loadConfig() {
 }
 
 /**
- * Check if Claude Code SDK is available
- * @returns {Promise<boolean>} True if SDK is available
+ * Check if AI is configured in .vibe/config.yml
+ * @returns {Object} AI configuration status
  */
-async function checkClaudeCodeSDK() {
-  try {
-    const { spawn } = await import('child_process');
-    
-    return new Promise((resolve) => {
-      const child = spawn('claude', ['--version'], { 
-        stdio: 'pipe',
-        timeout: 5000
-      });
-      
-      child.on('close', (code) => {
-        resolve(code === 0);
-      });
-      
-      child.on('error', () => {
-        resolve(false);
-      });
-      
-      // Timeout fallback
-      const timeout = setTimeout(() => {
-        try {
-          child.kill('SIGTERM');
-        } catch (killError) {
-          // Ignore kill errors
-        }
-        resolve(false);
-      }, 5000);
-      
-      child.on('exit', () => {
-        clearTimeout(timeout);
-      });
-    });
-  } catch (error) {
-    return false;
-  }
-}
+function checkAiConfiguration() {
+  const config = loadConfig();
 
-/**
- * Check if AI is configured and Claude Code SDK is available
- * @returns {Promise<Object>} AI configuration status
- * @throws {Error} If configuration check fails
- */
-async function checkAiConfiguration() {
-  try {
-    const config = loadConfig();
-    
-    // Check if AI is enabled in config
-    if (!config.ai || !config.ai.enabled || config.ai.provider === 'none') {
-      return { 
-        configured: false, 
-        needsSetup: false,
-        reason: 'AI is not enabled in configuration'
-      };
-    }
-    
-    // Check for Claude Code SDK availability
-    const sdkAvailable = await checkClaudeCodeSDK();
-    if (sdkAvailable) {
-      return { configured: true };
-    }
-    
-    // SDK not available - needs installation
-    return { 
-      configured: false, 
-      needsSetup: true,
-      reason: 'Claude Code SDK not found'
+  if (!config.ai?.enabled || config.ai?.provider === 'none') {
+    return {
+      configured: false,
+      reason: 'AI is not enabled. Run "vibe link" first.'
     };
-  } catch (error) {
-    throw new Error(`Failed to check AI configuration: ${error.message}`);
   }
-}
 
-/**
- * Show Claude Code SDK installation information
- * @returns {void}
- */
-function showClaudeCodeInstallation() {
-  logger.error('Claude Code SDK not found.');
-  logger.info('VibeKit refine requires Claude Code SDK to enhance tickets.');
-  console.log('\nTo install Claude Code SDK, run:');
-  console.log('  npm install -g @anthropic-ai/claude-code');
-  console.log('\nOr visit: https://docs.anthropic.com/en/docs/claude-code');
-  logger.tip('After installation, run this command again.');
+  return { configured: true };
 }
 
 
@@ -225,125 +150,118 @@ Response must be valid JSON only.`;
 }
 
 /**
- * Execute Claude Code SDK command safely
+ * Extract a JSON object from Claude's raw text response.
+ * Handles plain JSON, markdown code blocks, and mixed content.
+ * @param {string} text - Raw text from Claude
+ * @returns {string} Validated JSON string
+ * @throws {Error} If no valid JSON object can be found
+ */
+function extractJsonFromResponse(text) {
+  const cleaned = text.trim();
+
+  // 1. Direct parse — Claude responded with pure JSON
+  try {
+    JSON.parse(cleaned);
+    return cleaned;
+  } catch { /* fall through */ }
+
+  // 2. Markdown code block — ```json ... ``` or ``` ... ```
+  const codeBlockMatch = cleaned.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+  if (codeBlockMatch) {
+    const inner = codeBlockMatch[1].trim();
+    try {
+      JSON.parse(inner);
+      return inner;
+    } catch { /* fall through */ }
+  }
+
+  // 3. Loose extraction — grab first {...} block
+  const objMatch = cleaned.match(/\{[\s\S]*\}/);
+  if (objMatch) {
+    try {
+      JSON.parse(objMatch[0]);
+      return objMatch[0];
+    } catch { /* fall through */ }
+  }
+
+  throw new Error('No valid JSON object found in Claude response');
+}
+
+/**
+ * Parse the JSON envelope returned by `claude --print --output-format json`.
+ * Throws if the response signals an error or contains no result text.
+ * @param {string} raw - Raw stdout from the claude subprocess
+ * @returns {string} Claude's text result
+ * @throws {Error} If the envelope signals an error or cannot be parsed
+ */
+function parseClaudeEnvelope(raw) {
+  let envelope;
+  try {
+    envelope = JSON.parse(raw.trim());
+  } catch {
+    throw new Error('Claude returned non-JSON output');
+  }
+
+  if (envelope.is_error) {
+    throw new Error(envelope.result || 'Claude reported an error');
+  }
+
+  const text = envelope.result ?? '';
+  if (!text.trim()) {
+    throw new Error('Claude returned an empty result');
+  }
+
+  return text;
+}
+
+/**
+ * Send a prompt to Claude via `claude --print` and return the JSON response string.
+ * Uses the native Claude Code CLI — no API key management required.
  * @param {string} prompt - The prompt to send to Claude
- * @returns {Promise<string>} Claude's response
- * @throws {Error} If execution fails
+ * @returns {Promise<string>} Validated JSON string from Claude's result
+ * @throws {Error} If the subprocess fails or response contains no valid JSON
  */
 async function executeClaudeCommand(prompt) {
   if (typeof prompt !== 'string' || !prompt.trim()) {
     throw new Error('Prompt must be a non-empty string');
   }
-  
-  const { writeFileSync, unlinkSync } = await import('fs');
-  const { exec } = await import('child_process');
-  const { tmpdir } = await import('os');
-  const { join } = await import('path');
-  
+
   return new Promise((resolve, reject) => {
-    const tempFile = join(tmpdir(), `vibe-prompt-${Date.now()}-${Math.random().toString(36).substring(7)}.txt`);
-    let childProcess = null;
-    
-    // Cleanup function
-    const cleanup = () => {
-      try {
-        if (fs.existsSync(tempFile)) {
-          unlinkSync(tempFile);
-        }
-      } catch (cleanupError) {
-        // Ignore cleanup errors
-      }
-      
-      if (childProcess) {
-        try {
-          childProcess.kill('SIGTERM');
-        } catch (killError) {
-          // Ignore kill errors
-        }
-      }
-    };
-    
-    try {
-      // Write prompt to temporary file
-      writeFileSync(tempFile, prompt, 'utf8');
-    } catch (writeError) {
-      reject(new Error(`Failed to write prompt file: ${writeError.message}`));
-      return;
-    }
-    
-    const command = `cat "${tempFile}" | claude --print --output-format json --model ${ENHANCEMENT_MODEL}`;
-    
-    childProcess = exec(command, {
-      timeout: CLAUDE_SDK_TIMEOUT,
-      maxBuffer: 2 * 1024 * 1024, // 2MB buffer
-      killSignal: 'SIGTERM'
-    }, (error, stdout, stderr) => {
-      cleanup();
-      
-      if (error) {
-        // Handle specific error types
-        if (error.code === 'ENOENT') {
-          reject(new Error('Claude Code SDK not found. Please install it first.'));
-        } else if (error.code === 'EACCES') {
-          reject(new Error('Permission denied accessing Claude Code SDK.'));
-        } else if (error.signal === 'SIGTERM') {
-          reject(new Error('Claude SDK operation timed out.'));
-        } else {
-          reject(new Error(`Claude Code SDK failed: ${error.message}`));
-        }
+    // Create environment without API key — use native Claude Code authentication only
+    const env = { ...process.env };
+    delete env.ANTHROPIC_API_KEY;
+
+    const child = spawn('claude', ['--print', '--output-format', 'json'], {
+      stdio: ['pipe', 'pipe', 'pipe'],
+      env
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    child.stdout.on('data', (chunk) => { stdout += chunk; });
+    child.stderr.on('data', (chunk) => { stderr += chunk; });
+
+    child.on('error', (err) => {
+      reject(new Error(`Failed to spawn Claude: ${err.message}`));
+    });
+
+    child.on('close', (code) => {
+      if (!stdout.trim()) {
+        reject(new Error(stderr.trim() || `Claude exited with code ${code}`));
         return;
       }
-      
-      // Check for stderr output
-      if (stderr && stderr.trim()) {
-        console.warn(`⚠️  Claude SDK warning: ${stderr.trim()}`);
-      }
-      
-      // Validate stdout
-      if (!stdout || stdout.trim() === '') {
-        reject(new Error('Claude SDK returned empty response'));
-        return;
-      }
-      
+
       try {
-        // Try to parse as JSON first
-        const sdkResponse = JSON.parse(stdout.trim());
-        const result = sdkResponse.result || sdkResponse.content || sdkResponse;
-        
-        if (typeof result === 'string') {
-          resolve(result);
-        } else {
-          resolve(JSON.stringify(result));
-        }
-      } catch (parseError) {
-        // If JSON parsing fails, try to extract JSON from response
-        const jsonMatch = stdout.match(/{[\s\S]*}/);
-        if (jsonMatch) {
-          try {
-            JSON.parse(jsonMatch[0]); // Validate JSON
-            resolve(jsonMatch[0]);
-          } catch (secondParseError) {
-            reject(new Error(`Failed to parse Claude SDK response as JSON: ${secondParseError.message}`));
-          }
-        } else {
-          reject(new Error('Claude SDK response is not valid JSON'));
-        }
+        const text = parseClaudeEnvelope(stdout);
+        resolve(extractJsonFromResponse(text));
+      } catch (err) {
+        reject(err);
       }
     });
-    
-    // Handle process errors
-    childProcess.on('error', (error) => {
-      cleanup();
-      reject(new Error(`Failed to run Claude Code SDK: ${error.message}`));
-    });
-    
-    // Set up timeout handler
-    setTimeout(() => {
-      if (childProcess && !childProcess.killed) {
-        cleanup();
-        reject(new Error('Claude SDK operation timed out'));
-      }
-    }, CLAUDE_SDK_TIMEOUT + 1000);
+
+    child.stdin.write(prompt, 'utf8');
+    child.stdin.end();
   });
 }
 
@@ -646,14 +564,10 @@ async function refineCommand(args, options = {}) {
     logger.step(`Analyzing ticket ${ticketInput}...`);
     
     // Check AI configuration
-    const aiStatus = await checkAiConfiguration();
+    const aiStatus = checkAiConfiguration();
     if (!aiStatus.configured) {
-      if (aiStatus.needsSetup) {
-        showClaudeCodeInstallation();
-      } else {
-        logger.error('AI is not enabled in config. Run "vibe link" first.');
-      }
-      throw new Error(aiStatus.reason || 'AI configuration check failed');
+      logger.error(aiStatus.reason);
+      return;
     }
   
     // Resolve ticket ID
@@ -686,18 +600,8 @@ async function refineCommand(args, options = {}) {
       
     } catch (error) {
       loadingSpinner.fail('Enhancement failed');
-      
-      if (error.message.includes('Claude Code SDK failed')) {
-        logger.error('AI enhancement service is unavailable.');
-        logger.info('This could be due to:');
-        console.log('   • Claude Code SDK not installed or configured');
-        console.log('   • Network connectivity issues');
-        console.log('   • API rate limits or authentication problems');
-        logger.tip('You can still view and edit the ticket manually.');
-      } else {
-        logger.error('Failed to enhance ticket.');
-        logger.tip('Please check your Claude Code SDK installation and try again.');
-      }
+      logger.error(error.message);
+      logger.tip('You can still view and edit the ticket manually.');
       return;
     }
   
