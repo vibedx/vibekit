@@ -325,8 +325,6 @@ npm start  # Watch mode
 
 *Thank you to everyone who helps make VibeKit better!*
 
-**Maintainer**: [Ives van Hoorne](https://github.com/ivesvan) 
-
 *Want to see your name here? [Contribute to the project!](https://github.com/vibedx/vibekit/blob/main/CONTRIBUTING.md)*
 
 </div>
