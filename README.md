@@ -244,33 +244,33 @@ $ vibe lint --fix
 🎉 Most issues have been fixed! Please review and fix remaining errors manually.
 ```
 
-### 🦀 OpenClaw Integration - Code with Your Bot Over Chat
+### 🦀 OpenClaw Integration - Autonomous Workflow Management
 
-Get things done entirely over chat. Tell your bot to install VibeKit and follow the ticket workflow:
+Your bot automatically understands VibeKit. Just ask it to get started:
 
-1. **Install & Initialize** → `npm install -g @vibedx/vibekit && vibe init`
-2. **Create tickets** → `vibe new "Add feature X"`
-3. **Work on tickets** → `vibe start TKT-001` → Agent codes → `vibe close TKT-001`
-4. **Track progress** → `vibe list` — bot always knows what's done, what's next
+> "Set up this project with VibeKit, add tickets for the features we need, and start working on them."
 
-**Why tickets over chat?**
-- 🎯 **Clear scope** - No ambiguous instructions, just focused tickets
-- 🔍 **Full visibility** - See exactly what your bot did via git history
-- 🎮 **Stay in control** - You manage priorities, review, and redirect anytime
-- 📋 **Never lose context** - All work is tracked; bot recovers context from tickets
+The bot will:
+- Install & initialize VibeKit automatically
+- Create tickets from your requirements
+- Work on tickets, update progress, close when done
+- Use `vibe list` to track and manage the workflow
+- Keep all context in tickets — never loses progress between chats
+
+**What you can ask your bot to:**
+- 📝 **Add tickets** - "Create tickets for user auth, database setup, API integration"
+- ✏️ **Refine tickets** - "Update TKT-003 with better acceptance criteria"
+- 🗑️ **Remove tickets** - "Delete TKT-005, we don't need that anymore"
+- 🔍 **Check progress** - "What's done? What's in progress? Show me the summary"
+- 🚀 **Keep working** - "Continue where we left off, here's what I want next"
+
+**Why this works:**
+- 🎯 **Bot understands scope** - Tickets define clear, focused work
+- 🔍 **Full visibility** - You see exactly what the bot did in git history
+- 🎮 **Stay in control** - Ask to pause, change direction, review anytime
+- 📋 **Never restart** - Context lives in `.vibe/tickets/` — survives token limits
 
 **📚 [Full Guide & Examples →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** | **[TKT-018](/.vibe/tickets/TKT-018-add-openclaw-integration-documentation.md)** for details
-
-#### Getting Started with Your OpenClaw Bot
-
-Tell your bot to:
-1. **Install VibeKit** - `npm install -g @vibedx/vibekit`
-2. **Create tickets** - Break down work into focused tasks: `vibe new "Feature description"`
-3. **Track work over chats** - Bot reads tickets from `.vibe/tickets/` during each session
-4. **Never lose context** - All work is stored in markdown files, accessible anytime
-5. **Recreate context if needed** - When token limits hit, bot uses `vibe list` to resume from where it left off
-
-This way, tickets become the **single source of truth** for your project—no context loss, no repeated explanations. The bot always knows what was done, what's pending, and what's next.
 
 <img src="./docs/openclaw-use-case/01-create-ticket.jpg" alt="Creating First Ticket with VibeKit" width="500" />
 
