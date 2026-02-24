@@ -270,6 +270,17 @@ vibe list  # Track real-time status updates
 
 **📚 [Full OpenClaw Integration Guide →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** with workflow examples and screenshot walkthrough.
 
+#### Getting Started with Your OpenClaw Bot
+
+Tell your bot to:
+1. **Install & Initialize** - `npm install -g @vibedx/vibekit && vibe init` in your project
+2. **Create tickets** - Break down work into focused tasks: `vibe new "Feature description"`
+3. **Track work over chats** - Bot reads tickets from `.vibe/tickets/` during each session
+4. **Never lose context** - All work is stored in markdown files, accessible anytime
+5. **Recreate context if needed** - When token limits hit, bot uses `vibe list` to resume from where it left off
+
+This way, tickets become the **single source of truth** for your project—no context loss, no repeated explanations. The bot always knows what was done, what's pending, and what's next.
+
 ## ⚙️ Configuration
 
 VibeKit creates a `.vibe` directory in your project root:
