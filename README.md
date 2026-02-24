@@ -244,6 +244,36 @@ $ vibe lint --fix
 🎉 Most issues have been fixed! Please review and fix remaining errors manually.
 ```
 
+### 🦀 OpenClaw Integration - Autonomous Workflow Management
+
+Your bot automatically understands VibeKit. Just ask it to get started:
+
+> "Set up this project with @vibedx/vibekit, add tickets for the features we need, and start working on them."
+
+The bot will:
+- Install & initialize VibeKit automatically
+- Create tickets from your requirements
+- Work on tickets, update progress, close when done
+- Use `vibe list` to track and manage the workflow
+- Keep all context in tickets — never loses progress between chats
+
+**What you can ask your bot to:**
+- 📝 **Add tickets** - "Create tickets for user auth, database setup, API integration"
+- ✏️ **Refine tickets** - "Update TKT-003 with better acceptance criteria"
+- 🗑️ **Remove tickets** - "Delete TKT-005, we don't need that anymore"
+- 🔍 **Check progress** - "What's done? What's in progress? Show me the summary"
+- 🚀 **Keep working** - "Continue where we left off, here's what I want next"
+
+**Why this works:**
+- 🎯 **Bot understands scope** - Tickets define clear, focused work
+- 🔍 **Full visibility** - You see exactly what the bot did in git history
+- 🎮 **Stay in control** - Ask to pause, change direction, review anytime
+- 📋 **Never restart** - Context lives in `.vibe/tickets/` — survives token limits
+
+**📚 [Full Guide & Examples →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** | **[TKT-018](/.vibe/tickets/TKT-018-add-openclaw-integration-documentation.md)** for details
+
+<img src="./docs/openclaw-use-case/01-create-ticket.jpg" alt="Creating First Ticket with VibeKit" width="500" />
+
 ## ⚙️ Configuration
 
 VibeKit creates a `.vibe` directory in your project root:
