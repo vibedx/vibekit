@@ -268,7 +268,7 @@ vibe list  # Track real-time status updates
 - 🚀 **Parallel Work** - Spawn multiple agents on different tickets simultaneously
 - 📋 **Self-Documenting** - Tickets become your project's implementation history
 
-**📚 [Full OpenClaw Integration Guide →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** with workflow examples and screenshot walkthrough.
+**📚 [Full OpenClaw Integration Guide →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** with workflow examples and screenshot walkthrough. See **[TKT-018](/.vibe/tickets/TKT-018-add-openclaw-integration-documentation.md)** for complete documentation.
 
 #### Getting Started with Your OpenClaw Bot
 
