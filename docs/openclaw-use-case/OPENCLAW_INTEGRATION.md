@@ -98,7 +98,6 @@ This:
 | `vibe list` | Show all tickets |
 | `vibe start <ID>` | Begin work (creates branch) |
 | `vibe close <ID>` | Mark done, close branch |
-| `vibe link --api-key <key>` | Setup OpenClaw agent config |
 | `vibe refine <ID>` | AI-powered ticket enhancement |
 
 ## Configuration
