@@ -281,6 +281,10 @@ Tell your bot to:
 
 This way, tickets become the **single source of truth** for your project—no context loss, no repeated explanations. The bot always knows what was done, what's pending, and what's next.
 
+<div align="center">
+  <img src="./docs/openclaw-use-case/01-create-ticket.jpg" alt="Creating First Ticket with VibeKit" width="600" />
+</div>
+
 ## ⚙️ Configuration
 
 VibeKit creates a `.vibe` directory in your project root:
