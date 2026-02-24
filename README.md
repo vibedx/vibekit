@@ -244,31 +244,22 @@ $ vibe lint --fix
 🎉 Most issues have been fixed! Please review and fix remaining errors manually.
 ```
 
-### 🦀 OpenClaw Integration - Stay in Control, Code with Agents
+### 🦀 OpenClaw Integration - Code with Your Bot Over Chat
 
-Use VibeKit with OpenClaw to delegate ticket-based work to AI agents while maintaining full visibility and control:
+Get things done entirely over chat. Tell your bot to install VibeKit and follow the ticket workflow:
 
-```bash
-# 1. Create focused tickets
-vibe new "Add user authentication"
-vibe new "Setup database migrations"
+1. **Install & Initialize** → `npm install -g @vibedx/vibekit && vibe init`
+2. **Create tickets** → `vibe new "Add feature X"`
+3. **Work on tickets** → `vibe start TKT-001` → Agent codes → `vibe close TKT-001`
+4. **Track progress** → `vibe list` — bot always knows what's done, what's next
 
-# 2. Dispatch work to agents (Opus, Haiku)
-# Agent reads ticket, creates branch, implements, updates status
-sessions_spawn(task="Work on TKT-001 and TKT-002 using vibe CLI", model="anthropic/claude-opus-4-6")
+**Why tickets over chat?**
+- 🎯 **Clear scope** - No ambiguous instructions, just focused tickets
+- 🔍 **Full visibility** - See exactly what your bot did via git history
+- 🎮 **Stay in control** - You manage priorities, review, and redirect anytime
+- 📋 **Never lose context** - All work is tracked; bot recovers context from tickets
 
-# 3. Monitor progress
-vibe list  # Track real-time status updates
-```
-
-**Key Benefits:**
-- 🎯 **Bounded Context** - Agents work on focused tickets, not ambiguous tasks
-- 🔍 **Full Visibility** - See exactly what agents are doing via ticket updates and git branches
-- 🎮 **Stay in Control** - You manage priorities, review work, close/reopen tickets
-- 🚀 **Parallel Work** - Spawn multiple agents on different tickets simultaneously
-- 📋 **Self-Documenting** - Tickets become your project's implementation history
-
-**📚 [Full OpenClaw Integration Guide →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** with workflow examples and screenshot walkthrough. See **[TKT-018](/.vibe/tickets/TKT-018-add-openclaw-integration-documentation.md)** for complete documentation.
+**📚 [Full Guide & Examples →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** | **[TKT-018](/.vibe/tickets/TKT-018-add-openclaw-integration-documentation.md)** for details
 
 #### Getting Started with Your OpenClaw Bot
 
