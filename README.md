@@ -273,7 +273,7 @@ vibe list  # Track real-time status updates
 #### Getting Started with Your OpenClaw Bot
 
 Tell your bot to:
-1. **Install & Initialize** - `npm install -g @vibedx/vibekit && vibe init` in your project
+1. **Install VibeKit** - `npm install -g @vibedx/vibekit`
 2. **Create tickets** - Break down work into focused tasks: `vibe new "Feature description"`
 3. **Track work over chats** - Bot reads tickets from `.vibe/tickets/` during each session
 4. **Never lose context** - All work is stored in markdown files, accessible anytime
