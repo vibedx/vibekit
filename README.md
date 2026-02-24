@@ -244,6 +244,32 @@ $ vibe lint --fix
 🎉 Most issues have been fixed! Please review and fix remaining errors manually.
 ```
 
+### 🦀 OpenClaw Integration - Stay in Control, Code with Agents
+
+Use VibeKit with OpenClaw to delegate ticket-based work to AI agents while maintaining full visibility and control:
+
+```bash
+# 1. Create focused tickets
+vibe new "Add user authentication"
+vibe new "Setup database migrations"
+
+# 2. Dispatch work to agents (Opus, Haiku)
+# Agent reads ticket, creates branch, implements, updates status
+sessions_spawn(task="Work on TKT-001 and TKT-002 using vibe CLI", model="anthropic/claude-opus-4-6")
+
+# 3. Monitor progress
+vibe list  # Track real-time status updates
+```
+
+**Key Benefits:**
+- 🎯 **Bounded Context** - Agents work on focused tickets, not ambiguous tasks
+- 🔍 **Full Visibility** - See exactly what agents are doing via ticket updates and git branches
+- 🎮 **Stay in Control** - You manage priorities, review work, close/reopen tickets
+- 🚀 **Parallel Work** - Spawn multiple agents on different tickets simultaneously
+- 📋 **Self-Documenting** - Tickets become your project's implementation history
+
+**📚 [Full OpenClaw Integration Guide →](./docs/openclaw-use-case/OPENCLAW_INTEGRATION.md)** with workflow examples and screenshot walkthrough.
+
 ## ⚙️ Configuration
 
 VibeKit creates a `.vibe` directory in your project root:
