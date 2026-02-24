@@ -248,7 +248,7 @@ $ vibe lint --fix
 
 Your bot automatically understands VibeKit. Just ask it to get started:
 
-> "Set up this project with VibeKit, add tickets for the features we need, and start working on them."
+> "Set up this project with @vibedx/vibekit, add tickets for the features we need, and start working on them."
 
 The bot will:
 - Install & initialize VibeKit automatically
