@@ -83,8 +83,6 @@ async function unlinkCommand() {
     
     // Show current configuration
     console.log('📝 Current AI configuration:');
-    console.log(`   Provider: ${config.ai.provider === 'claude-code' ? 'Claude Code (Anthropic API)' : config.ai.provider}`);
-    console.log(`   Model: ${config.ai.model || 'Not specified'}`);
     console.log(`   Status: ${config.ai.enabled ? 'Enabled' : 'Disabled'}`);
     console.log();
     
@@ -101,7 +99,6 @@ async function unlinkCommand() {
     config.ai = {
       ...config.ai,
       enabled: false,
-      provider: 'none'
     };
     
     if (saveConfig(config)) {

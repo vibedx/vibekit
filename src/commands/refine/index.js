@@ -39,7 +39,7 @@ function loadConfig() {
 function checkAiConfiguration() {
   const config = loadConfig();
 
-  if (!config.ai?.enabled || config.ai?.provider === 'none') {
+  if (!config.ai?.enabled) {
     return {
       configured: false,
       reason: 'AI is not enabled. Run "vibe link" first.'
