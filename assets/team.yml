@@ -1,0 +1,22 @@
+# VibeKit Team Configuration
+# Add team members here. Use their ID as the assignee value in tickets.
+#
+# Usage:
+#   vibe team                              - List all members
+#   vibe team add <id> --name "Name" ...   - Add a member
+#   vibe team remove <id>                  - Remove a member
+#   vibe new "task" --assignee <id>        - Assign ticket to member
+
+members: {}
+  # Example:
+  # mani-yadv:
+  #   name: Mani
+  #   github: mani-yadv
+  #   slack: U0XXXXXXXX
+  #   x: vernon1943
+  #   role: Founder
+  # opusaku:
+  #   name: Opus
+  #   github: opusaku
+  #   slack: U0XXXXXXXX
+  #   role: Senior Engineer
