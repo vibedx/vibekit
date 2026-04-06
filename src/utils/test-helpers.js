@@ -111,7 +111,6 @@ export function createMockVibeProject(baseDir, options = {}) {
       },
       ai: {
         enabled: false,
-        provider: 'none'
       }
     };
     
@@ -141,7 +140,6 @@ git:
 
 ai:
   enabled: false
-  provider: none
 `;
     
     fs.writeFileSync(configPath, configContent, 'utf-8');
@@ -460,7 +458,6 @@ git:
 
 ai:
   enabled: false
-  provider: none
 `;
   
   // Create mock default.md template

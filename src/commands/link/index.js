@@ -162,7 +162,6 @@ async function linkCommand() {
   config.ai = {
     ...config.ai,
     enabled: true,
-    provider: 'claude-code',
   };
 
   if (!saveConfig(config)) {

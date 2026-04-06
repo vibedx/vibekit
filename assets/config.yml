@@ -23,7 +23,6 @@ tickets:
 
 ai:
   enabled: false
-  provider: "none"
 
 hooks:
   pre_commit: false

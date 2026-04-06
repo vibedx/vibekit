@@ -16,7 +16,7 @@ const GIT_STATUS_CHECK_TIMEOUT = 5000;
  * @returns {boolean} True if AI is enabled
  */
 function checkAiEnabled(config) {
-  return config && config.ai && config.ai.enabled && config.ai.provider !== 'none';
+  return config && config.ai && config.ai.enabled;
 }
 
 /**
