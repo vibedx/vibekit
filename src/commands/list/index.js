@@ -10,10 +10,13 @@ import { getTicketsDir } from '../../utils/index.js';
 function listCommand(args) {
   // Parse arguments for filtering
   let statusFilter = null;
-  
+  let assigneeFilter = null;
+
   for (let i = 0; i < args.length; i++) {
     if (args[i].startsWith("--status=")) {
       statusFilter = args[i].split("=")[1];
+    } else if (args[i].startsWith("--assignee=") || args[i].startsWith("--owner=")) {
+      assigneeFilter = args[i].split("=")[1];
     }
   }
   
@@ -49,6 +52,8 @@ function listCommand(args) {
           title: frontmatter.title || "Untitled",
           status: frontmatter.status || "unknown",
           priority: frontmatter.priority || "medium",
+          assignee: frontmatter.assignee || frontmatter.owner || "",
+          author: frontmatter.author || "",
           file
         });
       }
@@ -57,10 +62,16 @@ function listCommand(args) {
     }
   }
   
-  // Filter tickets if status filter is provided
-  const filteredTickets = statusFilter 
-    ? tickets.filter(ticket => ticket.status === statusFilter)
-    : tickets;
+  // Filter tickets
+  let filteredTickets = tickets;
+  if (statusFilter) {
+    filteredTickets = filteredTickets.filter(ticket => ticket.status === statusFilter);
+  }
+  if (assigneeFilter) {
+    filteredTickets = filteredTickets.filter(ticket =>
+      ticket.assignee.toLowerCase() === assigneeFilter.toLowerCase()
+    );
+  }
   
   // Sort tickets by ID
   filteredTickets.sort((a, b) => {
@@ -79,20 +90,27 @@ function listCommand(args) {
   // Display tickets in a formatted table
   console.log("\n✨ VibeKit Tickets ✨\n");
   
-  // Calculate column widths based on content
-  const idWidth = 10; // Fixed width for ID column
-  const statusWidth = 15; // Fixed width for status column
-  const titleWidth = 50; // Fixed width for title column
-  
+  // Calculate column widths
+  const idWidth = 10;
+  const statusWidth = 15;
+  const assigneeWidth = 14;
+  const titleWidth = 40;
+
+  // Check if any tickets have assignees
+  const hasAssignees = filteredTickets.some(t => t.assignee);
+
   // Print header
-  console.log(
-    `${"ID".padEnd(idWidth)}${"|"} ${
-      "STATUS".padEnd(statusWidth)
-    }${"|"} ${
-      "TITLE"
-    }`
-  );
-  console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  if (hasAssignees) {
+    console.log(
+      `${"ID".padEnd(idWidth)}${"|"} ${"STATUS".padEnd(statusWidth)}${"|"} ${"ASSIGNEE".padEnd(assigneeWidth)}${"|"} TITLE`
+    );
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(assigneeWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  } else {
+    console.log(
+      `${"ID".padEnd(idWidth)}${"|"} ${"STATUS".padEnd(statusWidth)}${"|"} TITLE`
+    );
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  }
   
   for (const ticket of filteredTickets) {
     let statusColor = "";
@@ -112,20 +130,39 @@ function listCommand(args) {
         statusColor = "\x1b[0m"; // Default
     }
     
-    // Format each row with proper padding
-    console.log(
-      `${ticket.id.padEnd(idWidth)}${"|"} ${
-        statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
-      }${"|"} ${
-        ticket.title.length > titleWidth - 3
-          ? ticket.title.substring(0, titleWidth - 3) + "..."
-          : ticket.title
-      }`
-    );
+    // Format each row
+    const truncatedTitle = ticket.title.length > titleWidth - 3
+      ? ticket.title.substring(0, titleWidth - 3) + "..."
+      : ticket.title;
+
+    if (hasAssignees) {
+      console.log(
+        `${ticket.id.padEnd(idWidth)}${"|"} ${
+          statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
+        }${"|"} ${
+          (ticket.assignee || "").padEnd(assigneeWidth - 1)
+        }${"|"} ${truncatedTitle}`
+      );
+    } else {
+      console.log(
+        `${ticket.id.padEnd(idWidth)}${"|"} ${
+          statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
+        }${"|"} ${truncatedTitle}`
+      );
+    }
   }
-  
-  console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
-  console.log(`Found ${filteredTickets.length} ticket(s)${statusFilter ? ` with status: ${statusFilter}` : ""}.\n`);
+
+  if (hasAssignees) {
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(assigneeWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  } else {
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  }
+
+  const filters = [
+    statusFilter ? `status: ${statusFilter}` : '',
+    assigneeFilter ? `assignee: ${assigneeFilter}` : '',
+  ].filter(Boolean).join(', ');
+  console.log(`Found ${filteredTickets.length} ticket(s)${filters ? ` (${filters})` : ''}.\n`);
 }
 
 export default listCommand;
