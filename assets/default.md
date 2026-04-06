@@ -4,6 +4,7 @@ title: {title}
 slug: {slug}
 status: open
 priority: medium
+owner: ""
 created_at: {date}
 updated_at: {date}
 ---

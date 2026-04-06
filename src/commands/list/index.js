@@ -10,10 +10,13 @@ import { getTicketsDir } from '../../utils/index.js';
 function listCommand(args) {
   // Parse arguments for filtering
   let statusFilter = null;
-  
+  let ownerFilter = null;
+
   for (let i = 0; i < args.length; i++) {
     if (args[i].startsWith("--status=")) {
       statusFilter = args[i].split("=")[1];
+    } else if (args[i].startsWith("--owner=")) {
+      ownerFilter = args[i].split("=")[1];
     }
   }
   
@@ -49,6 +52,7 @@ function listCommand(args) {
           title: frontmatter.title || "Untitled",
           status: frontmatter.status || "unknown",
           priority: frontmatter.priority || "medium",
+          owner: frontmatter.owner || "",
           file
         });
       }
@@ -57,10 +61,16 @@ function listCommand(args) {
     }
   }
   
-  // Filter tickets if status filter is provided
-  const filteredTickets = statusFilter 
-    ? tickets.filter(ticket => ticket.status === statusFilter)
-    : tickets;
+  // Filter tickets
+  let filteredTickets = tickets;
+  if (statusFilter) {
+    filteredTickets = filteredTickets.filter(ticket => ticket.status === statusFilter);
+  }
+  if (ownerFilter) {
+    filteredTickets = filteredTickets.filter(ticket =>
+      ticket.owner.toLowerCase() === ownerFilter.toLowerCase()
+    );
+  }
   
   // Sort tickets by ID
   filteredTickets.sort((a, b) => {
@@ -80,19 +90,26 @@ function listCommand(args) {
   console.log("\n✨ VibeKit Tickets ✨\n");
   
   // Calculate column widths based on content
-  const idWidth = 10; // Fixed width for ID column
-  const statusWidth = 15; // Fixed width for status column
-  const titleWidth = 50; // Fixed width for title column
-  
+  const idWidth = 10;
+  const statusWidth = 15;
+  const ownerWidth = 12;
+  const titleWidth = 40;
+
+  // Check if any tickets have owners
+  const hasOwners = filteredTickets.some(t => t.owner);
+
   // Print header
-  console.log(
-    `${"ID".padEnd(idWidth)}${"|"} ${
-      "STATUS".padEnd(statusWidth)
-    }${"|"} ${
-      "TITLE"
-    }`
-  );
-  console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  if (hasOwners) {
+    console.log(
+      `${"ID".padEnd(idWidth)}${"|"} ${"STATUS".padEnd(statusWidth)}${"|"} ${"OWNER".padEnd(ownerWidth)}${"|"} TITLE`
+    );
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(ownerWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  } else {
+    console.log(
+      `${"ID".padEnd(idWidth)}${"|"} ${"STATUS".padEnd(statusWidth)}${"|"} TITLE`
+    );
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  }
   
   for (const ticket of filteredTickets) {
     let statusColor = "";
@@ -113,19 +130,38 @@ function listCommand(args) {
     }
     
     // Format each row with proper padding
-    console.log(
-      `${ticket.id.padEnd(idWidth)}${"|"} ${
-        statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
-      }${"|"} ${
-        ticket.title.length > titleWidth - 3
-          ? ticket.title.substring(0, titleWidth - 3) + "..."
-          : ticket.title
-      }`
-    );
+    const truncatedTitle = ticket.title.length > titleWidth - 3
+      ? ticket.title.substring(0, titleWidth - 3) + "..."
+      : ticket.title;
+
+    if (hasOwners) {
+      console.log(
+        `${ticket.id.padEnd(idWidth)}${"|"} ${
+          statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
+        }${"|"} ${
+          (ticket.owner || "").padEnd(ownerWidth - 1)
+        }${"|"} ${truncatedTitle}`
+      );
+    } else {
+      console.log(
+        `${ticket.id.padEnd(idWidth)}${"|"} ${
+          statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
+        }${"|"} ${truncatedTitle}`
+      );
+    }
   }
-  
-  console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
-  console.log(`Found ${filteredTickets.length} ticket(s)${statusFilter ? ` with status: ${statusFilter}` : ""}.\n`);
+
+  if (hasOwners) {
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(ownerWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  } else {
+    console.log(`${'-'.repeat(idWidth)}+${'-'.repeat(statusWidth + 2)}+${'-'.repeat(titleWidth)}`);
+  }
+
+  const filters = [
+    statusFilter ? `status: ${statusFilter}` : '',
+    ownerFilter ? `owner: ${ownerFilter}` : '',
+  ].filter(Boolean).join(', ');
+  console.log(`Found ${filteredTickets.length} ticket(s)${filters ? ` (${filters})` : ''}.\n`);
 }
 
 export default listCommand;

@@ -1,0 +1,13 @@
+services:
+  vibekit-dev:
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    container_name: vibekit-dev
+    volumes:
+      - .:/workspace:cached
+      - /tmp/vibekit-test:/tmp/vibekit-test
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    command: bash -c "npm install --silent && npm link --silent && bash"

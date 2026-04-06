@@ -32,28 +32,32 @@ function parseArguments(args) {
   let titleParts = [];
   let priority = DEFAULT_PRIORITY;
   let status = DEFAULT_STATUS;
-  
+  let owner = '';
+
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     if (arg === '--priority' && i + 1 < args.length) {
       priority = args[i + 1];
-      i++; // Skip the next argument as it's the priority value
+      i++;
     } else if (arg === '--status' && i + 1 < args.length) {
       status = args[i + 1];
-      i++; // Skip the next argument as it's the status value
+      i++;
+    } else if (arg === '--owner' && i + 1 < args.length) {
+      owner = args[i + 1];
+      i++;
     } else if (!arg.startsWith('--')) {
       titleParts.push(arg);
     }
   }
-  
+
   const title = titleParts.join(' ').trim();
-  
+
   if (!title) {
     throw new Error('Please provide a title for the new ticket.');
   }
-  
-  return { title, priority, status };
+
+  return { title, priority, status, owner };
 }
 
 /**
@@ -93,16 +97,17 @@ function createTicketContent(template, ticketData) {
     throw new Error('Template must be a string');
   }
   
-  const { ticketId, title, slug, priority, status, timestamp } = ticketData;
+  const { ticketId, title, slug, priority, status, owner, timestamp } = ticketData;
   const paddedId = ticketId.replace('TKT-', '');
-  
+
   return template
     .replace(/{id}/g, paddedId)
     .replace(/{title}/g, title)
     .replace(/{slug}/g, slug)
     .replace(/{date}/g, timestamp)
     .replace(/^priority: .*$/m, `priority: ${priority}`)
-    .replace(/^status: .*$/m, `status: ${status}`);
+    .replace(/^status: .*$/m, `status: ${status}`)
+    .replace(/^owner: .*$/m, `owner: "${owner || ''}"`);
 }
 
 /**
@@ -193,7 +198,7 @@ async function handleFileRename(originalPath, ticketDir) {
 async function newCommand(args) {
   try {
     // Parse and validate arguments
-    const { title, priority, status } = parseArguments(args);
+    const { title, priority, status, owner } = parseArguments(args);
     
     // Check required files and paths
     const configPath = path.join(process.cwd(), '.vibe', 'config.yml');
@@ -236,6 +241,7 @@ async function newCommand(args) {
       slug: ticketSlug,
       priority: validatedOptions.priority,
       status: validatedOptions.status,
+      owner,
       timestamp
     };
     
