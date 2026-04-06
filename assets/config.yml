@@ -21,6 +21,9 @@ tickets:
     - high
     - critical
 
+team:
+  path: .vibe/team.yml
+
 ai:
   enabled: false
 

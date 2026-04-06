@@ -84,11 +84,13 @@ vibe get-started
 ```bash
 # Create a new ticket
 vibe new "Fix login bug"
-vibe new "Add dark mode" --priority high --status open
+vibe new "Add dark mode" --priority high --assignee opusaku
+vibe new "Quick task" --assignee mani-yadv -n   # -n skips AI prompt
 
 # List all tickets (with optional filtering)
 vibe list
 vibe list --status=open
+vibe list --assignee=opusaku
 
 # Close/complete a ticket
 vibe close TKT-001
@@ -96,6 +98,22 @@ vibe close TKT-001
 # Start working on a ticket (creates git branch)
 vibe start TKT-001
 vibe start TKT-001 --base main --update-status
+```
+
+### 👥 Team Management
+```bash
+# List team members
+vibe team
+
+# Add a member (stored in .vibe/team.yml)
+vibe team add mani-yadv --name "Mani" --github mani-yadv --slack U0ABC123 --x vernon1943 --role Founder
+vibe team add opusaku --name "Opus" --github opusaku --slack U0DEF456 --role "Senior Engineer"
+
+# Show a member's details
+vibe team show mani-yadv
+
+# Remove a member
+vibe team remove old-member
 ```
 
 ### 🤖 AI Integration
@@ -281,6 +299,7 @@ VibeKit creates a `.vibe` directory in your project root:
 ```
 📁 .vibe/
   ├── 📋 config.yml           # Main configuration
+  ├── 👥 team.yml             # Team members (GitHub, Slack, X handles)
   ├── 📁 .templates/          # Ticket templates
   │   └── 📄 default.md       # Default ticket template
   ├── 📁 tickets/             # Your ticket files
@@ -316,10 +335,13 @@ tickets:
     - high
     - critical
 
+# Team (stored in separate file for large teams)
+team:
+  path: .vibe/team.yml
+
 # AI integration
 ai:
   enabled: true
-  provider: claude-code
 
 # Git integration
 git:

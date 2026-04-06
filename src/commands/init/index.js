@@ -23,7 +23,8 @@ function initCommand(args) {
   // Use real files instead of hardcoded template strings
   const templateSrc = path.join(__dirname, "../../../assets", "default.md");
   const configSrc = path.join(__dirname, "../../../assets", "config.yml");
-  
+  const teamSrc = path.join(__dirname, "../../../assets", "team.yml");
+
   fs.mkdirSync(targetFolder, { recursive: true });
   fs.mkdirSync(path.join(targetFolder, "tickets"), { recursive: true });
   fs.mkdirSync(path.join(targetFolder, ".templates"), { recursive: true });
@@ -31,6 +32,7 @@ function initCommand(args) {
   // Copy files from assets directory instead of using hardcoded templates
   fs.copyFileSync(configSrc, path.join(targetFolder, "config.yml"));
   fs.copyFileSync(templateSrc, path.join(targetFolder, ".templates", "default.md"));
+  fs.copyFileSync(teamSrc, path.join(targetFolder, "team.yml"));
 
   console.log(`✅ '${targetFolder}' initialized with config, tickets/, and .templates/default.md`);
   
