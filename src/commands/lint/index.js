@@ -87,7 +87,12 @@ function getRequiredFrontmatter(config) {
     }
     
     const frontmatter = yaml.load(parts[1]);
-    return Object.keys(frontmatter || {});
+    // Only require fields that have non-empty default values in the template
+    // Fields like assignee: "" and author: "" are optional
+    return Object.keys(frontmatter || {}).filter(key => {
+      const val = frontmatter[key];
+      return val !== '' && val !== null && val !== undefined;
+    });
   } catch (error) {
     // Fallback to default required fields
     return ['id', 'title', 'slug', 'status', 'priority', 'created_at', 'updated_at'];

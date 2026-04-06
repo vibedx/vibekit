@@ -2,14 +2,9 @@ members:
   maniyadv:
     name: Mani
     github: maniyadv
-    x: vernon1943
-    role: Founder
   opusaku:
     name: Opus
     github: opusaku
-    x: opusaku
-    role: Senior Engineer
   cloreneme:
     name: Clorene
     github: cloreneme
-    role: Engineer
