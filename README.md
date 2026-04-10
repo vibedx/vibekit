@@ -106,7 +106,7 @@ vibe start TKT-001 --base main --update-status
 vibe team
 
 # Add a member (stored in .vibe/team.yml)
-vibe team add mani-yadv --name "Mani" --github mani-yadv --slack U0ABC123 --x vernon1943 --role Founder
+vibe team add mani-yadv --name "Mani" --github mani-yadv --slack U0ABC123 --x exampleuser --role Founder
 vibe team add opusaku --name "Opus" --github opusaku --slack U0DEF456 --role "Senior Engineer"
 
 # Show a member's details
