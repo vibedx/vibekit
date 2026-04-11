@@ -41,6 +41,16 @@ vibe new "Add user authentication"
 vibe start TKT-001
 ```
 
+### 🤖 Use with AI Agents (skills.sh)
+
+Install the vibekit skill so AI coding agents (Claude Code, Cursor, Codex, etc.) know how to use it:
+
+```bash
+npx skills add vibedx/vibekit
+```
+
+The skill teaches agents the ticket-driven workflow — they'll create focused tickets before writing code, track work through git branches, and keep tickets as living documentation.
+
 ## 🤔 Why VibeKit?
 
 - **🎯 Vibe code with manageable smaller tasks** - Break down complex features into focused tickets
