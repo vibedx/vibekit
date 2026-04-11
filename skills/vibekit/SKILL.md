@@ -13,9 +13,23 @@ metadata:
 
 VibeKit is a CLI for managing development tickets and AI-assisted workflows. This skill teaches agents how to use vibekit properly — create tickets before coding, work through them systematically, and keep tickets as living documentation.
 
-## Primary Rule: Tickets First
+## 🔴 MANDATORY RULE: Always Create a Ticket First
 
-For any non-trivial task, **create a ticket before writing code**. Tickets break work into scoped, focused chunks that reduce AI drift and create documentation as a side effect.
+**Before writing ANY code on a repo that has a `.vibe/` directory, you MUST create a vibekit ticket.** No exceptions for features, bug fixes, refactors, or multi-step tasks.
+
+This is not a suggestion — it's the core workflow. If the user asks you to "add X", "fix Y", or "build Z", your first action should be:
+
+```bash
+vibe new "descriptive title" --assignee <your-username> --priority <level> -n
+```
+
+Then read the ticket, plan the work, and `vibe start TKT-XXX` before touching any code.
+
+**Only skip the ticket for truly trivial changes**: typo fixes, single-line config tweaks, or answering a quick question.
+
+## Why This Matters
+
+Tickets break work into scoped, focused chunks that reduce AI drift and create documentation as a side effect. They also give humans a clear trail of what was done and why — critical for collaboration between humans and agents.
 
 ```bash
 # 1. Create a ticket
