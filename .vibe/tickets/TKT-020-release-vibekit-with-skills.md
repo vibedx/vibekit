@@ -2,10 +2,10 @@
 id: TKT-020
 title: Release vibekit with skills.sh support
 slug: TKT-020-release-vibekit-with-skills
-status: in_progress
+status: done
 priority: high
-assignee: "opusaku"
-author: ""
+assignee: opusaku
+author: ''
 created_at: 2026-04-11T11:45:06.237Z
 updated_at: 2026-04-11T11:45:54.993Z
 ---
