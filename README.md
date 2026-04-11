@@ -51,6 +51,8 @@ npx skills add vibedx/vibekit
 
 The skill teaches agents the ticket-driven workflow — they'll create focused tickets before writing code, track work through git branches, and keep tickets as living documentation.
 
+**Coordinating multiple agents?** See **[docs/agent-workflow.md](./docs/agent-workflow.md)** for a framework-agnostic pattern for running multi-agent teams on a shared repo — assignees, polling loops, escalation, and loop prevention.
+
 ## 🤔 Why VibeKit?
 
 - **🎯 Vibe code with manageable smaller tasks** - Break down complex features into focused tickets
@@ -94,13 +96,13 @@ vibe get-started
 ```bash
 # Create a new ticket
 vibe new "Fix login bug"
-vibe new "Add dark mode" --priority high --assignee opusaku
-vibe new "Quick task" --assignee mani-yadv -n   # -n skips AI prompt
+vibe new "Add dark mode" --priority high --assignee alice
+vibe new "Quick task" --assignee bob -n   # -n skips AI prompt
 
 # List all tickets (with optional filtering)
 vibe list
 vibe list --status=open
-vibe list --assignee=opusaku
+vibe list --assignee=alice
 
 # Close/complete a ticket
 vibe close TKT-001
@@ -116,11 +118,11 @@ vibe start TKT-001 --base main --update-status
 vibe team
 
 # Add a member (stored in .vibe/team.yml)
-vibe team add mani-yadv --name "Mani" --github mani-yadv --slack U0ABC123 --x vernon1943 --role Founder
-vibe team add opusaku --name "Opus" --github opusaku --slack U0DEF456 --role "Senior Engineer"
+vibe team add alice --name "Alice" --github alice --slack U0ABC123 --role Engineer
+vibe team add bob --name "Bob" --github bob --slack U0DEF456 --role Designer
 
 # Show a member's details
-vibe team show mani-yadv
+vibe team show alice
 
 # Remove a member
 vibe team remove old-member

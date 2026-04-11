@@ -2,12 +2,12 @@
 id: TKT-021
 title: Add agent collaboration workflow guide to docs
 slug: TKT-021-add-agent-collaboration
-status: open
+status: done
 priority: high
-assignee: "opusaku"
-author: ""
+assignee: opusaku
+author: ''
 created_at: 2026-04-11T12:05:08.105Z
-updated_at: 2026-04-11T12:05:08.105Z
+updated_at: 2026-04-11T12:07:13.766Z
 ---
 
 ## Description
