@@ -2,11 +2,6 @@
 name: vibekit
 description: Ticket-driven development workflow for AI coding agents using VibeKit CLI. Use when the user asks to create a task, feature, bug fix, or ticket; mentions "vibe new", "vibe list", or vibekit commands; or wants structured, scoped work breakdown. Triggers on phrases like "add a ticket", "track this task", "break this down", or "start a new feature". Helps agents create focused tickets with clear acceptance criteria before writing code.
 license: MIT
-metadata:
-  author: vibedx
-  version: "1.0.0"
-  homepage: https://github.com/vibedx/vibekit
-  npm: "@vibedx/vibekit"
 ---
 
 # VibeKit — Ticket-Driven Development
