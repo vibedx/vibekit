@@ -63,6 +63,7 @@ The skill teaches agents the ticket-driven workflow — they'll create focused t
 - **🚀 AI-native ticket management** - Purpose-built for AI-assisted development workflows
 - **⚡ Generate tickets using Claude Code and Codex power** - Leverage cutting-edge AI for planning
 - **🔄 Seamless git workflow** - Automatic branch creation and status tracking
+- **🌿 Parallel worktrees** - Work on multiple tickets simultaneously with `--worktree`
 - **📝 Living documentation** - Your tickets in git become your project's development story
 
 ## ✨ Features
@@ -74,7 +75,8 @@ The skill teaches agents the ticket-driven workflow — they'll create focused t
 ```
 
 - **🎯 Smart Tickets**: Create, manage, and track development tickets with unique IDs
-- **🔗 Git Integration**: Automatic branch creation and workflow management  
+- **🔗 Git Integration**: Automatic branch creation and workflow management
+- **🌿 Worktree Support**: Work on multiple tickets in parallel without switching branches
 - **🤖 AI Enhancement**: Claude Code integration for ticket refinement and content improvement
 - **📋 Interactive CLI**: Beautiful terminal interface with arrow navigation
 - **📝 Templates**: Customizable ticket templates for consistent workflows
@@ -110,6 +112,10 @@ vibe close TKT-001
 # Start working on a ticket (creates git branch)
 vibe start TKT-001
 vibe start TKT-001 --base main --update-status
+
+# Start in a separate worktree (parallel work without switching branches)
+vibe start TKT-001 --worktree
+vibe start TKT-001 -w
 ```
 
 ### 👥 Team Management
@@ -227,6 +233,31 @@ Fix responsive layout issues in `src/components/Layout.jsx`
 - Update CSS Grid in `src/styles/layout.css` for mobile breakpoints
 - Add `useMediaQuery()` hook for responsive state management
 - Test on devices: iPhone SE, iPad, desktop (1920px+)
+```
+
+### Working with Worktrees (Parallel Development)
+```bash
+# Start a ticket in its own worktree
+$ vibe start TKT-005 --worktree
+🌿 Created worktree at ~/.vibekit/worktrees/myproject/feature--TKT-005-add-api-cache/
+📝 Updated ticket status to in_progress
+💡 cd ~/.vibekit/worktrees/myproject/feature--TKT-005-add-api-cache/
+💡 Run npm install in the worktree if needed
+
+# Your main branch stays untouched — work on TKT-005 in the worktree
+# List tickets shows worktree indicator
+$ vibe list
+┌─────────┬──────────────┬─────────────────────────────┬──────────┐
+│ ID      │ Status       │ Title                       │ Worktree │
+├─────────┼──────────────┼─────────────────────────────┼──────────┤
+│ TKT-005 │ in_progress  │ Add API cache               │ 🌿       │
+│ TKT-004 │ in_progress  │ Add dark mode toggle        │          │
+└─────────┴──────────────┴─────────────────────────────┴──────────┘
+
+# Close removes the worktree automatically
+$ vibe close TKT-005
+🗑️  Removed worktree at ~/.vibekit/worktrees/myproject/feature--TKT-005-add-api-cache/
+✅ Closed TKT-005
 ```
 
 ### Quality Control with Lint
@@ -359,6 +390,7 @@ ai:
 git:
   branch_prefix: feature/
   default_base: main
+  worktrees_path: ~/.vibekit/worktrees  # Where worktrees are created
 
 # Hooks
 hooks:
