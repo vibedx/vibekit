@@ -23,7 +23,7 @@ const __dirname = dirname(__filename);
 // Available commands in VibeKit
 const AVAILABLE_COMMANDS = [
   'init', 'new', 'close', 'list', 'get-started',
-  'start', 'link', 'unlink', 'refine', 'lint', 'review', 'team'
+  'start', 'link', 'unlink', 'refine', 'lint', 'review', 'team', 'skills'
 ];
 
 /**
