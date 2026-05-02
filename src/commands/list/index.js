@@ -54,6 +54,7 @@ function listCommand(args) {
           priority: frontmatter.priority || "medium",
           assignee: frontmatter.assignee || frontmatter.owner || "",
           author: frontmatter.author || "",
+          worktree_path: frontmatter.worktree_path || "",
           file
         });
       }
@@ -114,8 +115,7 @@ function listCommand(args) {
   
   for (const ticket of filteredTickets) {
     let statusColor = "";
-    
-    // Add color based on status
+
     switch (ticket.status) {
       case "done":
         statusColor = "\x1b[32m"; // Green
@@ -129,8 +129,8 @@ function listCommand(args) {
       default:
         statusColor = "\x1b[0m"; // Default
     }
-    
-    // Format each row
+
+    const wtIndicator = ticket.worktree_path ? " 🌿" : "";
     const truncatedTitle = ticket.title.length > titleWidth - 3
       ? ticket.title.substring(0, titleWidth - 3) + "..."
       : ticket.title;
@@ -141,13 +141,13 @@ function listCommand(args) {
           statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
         }${"|"} ${
           (ticket.assignee || "").padEnd(assigneeWidth - 1)
-        }${"|"} ${truncatedTitle}`
+        }${"|"} ${truncatedTitle}${wtIndicator}`
       );
     } else {
       console.log(
         `${ticket.id.padEnd(idWidth)}${"|"} ${
           statusColor + ticket.status.padEnd(statusWidth - 1) + "\x1b[0m"
-        }${"|"} ${truncatedTitle}`
+        }${"|"} ${truncatedTitle}${wtIndicator}`
       );
     }
   }

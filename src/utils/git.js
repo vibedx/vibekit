@@ -1,5 +1,6 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 
 /**
@@ -134,6 +135,106 @@ function getGitStatus() {
   }
 }
 
+function getRepoRoot() {
+  try {
+    return execSync('git rev-parse --show-toplevel', { encoding: 'utf-8' }).trim();
+  } catch (error) {
+    return null;
+  }
+}
+
+function getMainWorktreeRoot() {
+  try {
+    const worktrees = execSync('git worktree list --porcelain', { encoding: 'utf-8' });
+    const firstWorktreeLine = worktrees.split('\n').find(line => line.startsWith('worktree '));
+    if (firstWorktreeLine) {
+      return firstWorktreeLine.replace('worktree ', '');
+    }
+    return getRepoRoot();
+  } catch (error) {
+    return getRepoRoot();
+  }
+}
+
+function getRepoName() {
+  try {
+    const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
+    // Handle git@github.com:org/repo.git
+    let match = remoteUrl.match(/[:/]([^/]+?)(?:\.git)?$/);
+    if (match) return match[1];
+  } catch (error) {
+    // No remote — fall through
+  }
+  const root = getRepoRoot();
+  return root ? path.basename(root) : 'unknown-repo';
+}
+
+function getWorktreesDir(repoName) {
+  const name = repoName || getRepoName();
+  return path.join(os.homedir(), '.vibekit', 'worktrees', name);
+}
+
+function sanitizeBranchForPath(branch) {
+  return branch.replace(/\//g, '--');
+}
+
+function getWorktreePath(repoName, branch) {
+  return path.join(getWorktreesDir(repoName), sanitizeBranchForPath(branch));
+}
+
+function createWorktree(worktreePath, branch, baseBranch) {
+  const base = baseBranch || getDefaultBaseBranch();
+  try {
+    execSync(`git fetch origin ${base}`, { stdio: 'ignore' });
+  } catch (error) {
+    // Ignore fetch errors
+  }
+  fs.mkdirSync(path.dirname(worktreePath), { recursive: true });
+  try {
+    execSync(`git worktree add "${worktreePath}" -b ${branch} origin/${base}`, { stdio: 'pipe' });
+  } catch (error) {
+    execSync(`git worktree add "${worktreePath}" -b ${branch} ${base}`, { stdio: 'pipe' });
+  }
+  return true;
+}
+
+function createWorktreeExistingBranch(worktreePath, branch) {
+  fs.mkdirSync(path.dirname(worktreePath), { recursive: true });
+  execSync(`git worktree add "${worktreePath}" ${branch}`, { stdio: 'pipe' });
+  return true;
+}
+
+function removeWorktree(worktreePath, force = false) {
+  const forceFlag = force ? ' --force' : '';
+  execSync(`git worktree remove "${worktreePath}"${forceFlag}`, { stdio: 'pipe' });
+  return true;
+}
+
+function listWorktrees() {
+  try {
+    const output = execSync('git worktree list --porcelain', { encoding: 'utf-8' });
+    const worktrees = [];
+    let current = {};
+    for (const line of output.split('\n')) {
+      if (line.startsWith('worktree ')) {
+        if (current.path) worktrees.push(current);
+        current = { path: line.replace('worktree ', '') };
+      } else if (line.startsWith('branch refs/heads/')) {
+        current.branch = line.replace('branch refs/heads/', '');
+      } else if (line === 'bare') {
+        current.bare = true;
+      } else if (line === '') {
+        if (current.path) worktrees.push(current);
+        current = {};
+      }
+    }
+    if (current.path) worktrees.push(current);
+    return worktrees;
+  } catch (error) {
+    return [];
+  }
+}
+
 export {
   isGitRepository,
   getCurrentBranch,
@@ -142,5 +243,15 @@ export {
   getDefaultBaseBranch,
   createAndCheckoutBranch,
   checkoutBranch,
-  getGitStatus
+  getGitStatus,
+  getRepoRoot,
+  getMainWorktreeRoot,
+  getRepoName,
+  getWorktreesDir,
+  getWorktreePath,
+  sanitizeBranchForPath,
+  createWorktree,
+  createWorktreeExistingBranch,
+  removeWorktree,
+  listWorktrees
 };
