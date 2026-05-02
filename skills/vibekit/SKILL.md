@@ -59,7 +59,8 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe new "title"` | Create a ticket |
 | `vibe list` | List all tickets |
 | `vibe start <id>` | Start work (creates git branch) |
-| `vibe close <id>` | Mark ticket done |
+| `vibe start <id> --worktree` | Start work in a separate worktree |
+| `vibe close <id>` | Mark ticket done (cleans up worktree if any) |
 | `vibe lint` | Validate ticket format |
 | `vibe lint --fix` | Auto-fix missing sections |
 | `vibe refine <id>` | AI-enhance ticket details |
@@ -153,6 +154,27 @@ Apply vibekit workflow when:
 `vibe close TKT-001`:
 1. Updates ticket status to `done`
 2. Leaves the branch for manual merge/PR
+
+### Worktree Support (Parallel Development)
+
+Use `--worktree` / `-w` to work on multiple tickets simultaneously without switching branches:
+
+```bash
+# Start ticket in a dedicated worktree
+vibe start TKT-002 --worktree
+
+# The worktree is created at ~/.vibekit/worktrees/<repo>/<branch>/
+# Your main working directory stays on its current branch
+# cd into the worktree path to work on the ticket
+
+# Close automatically removes the worktree
+vibe close TKT-002
+
+# If the worktree has uncommitted changes, use --force
+vibe close TKT-002 --force
+```
+
+`vibe list` shows a 🌿 indicator next to tickets with active worktrees.
 
 ## Automation Pattern
 
