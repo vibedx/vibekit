@@ -2,14 +2,18 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { getTicketsDir, getConfig, createSlug } from '../../utils/index.js';
-import { 
-  isGitRepository, 
-  getCurrentBranch, 
-  branchExistsLocally, 
+import {
+  isGitRepository,
+  getCurrentBranch,
+  branchExistsLocally,
   branchExistsRemotely,
   createAndCheckoutBranch,
   checkoutBranch,
-  getGitStatus
+  getGitStatus,
+  getRepoName,
+  getWorktreePath,
+  createWorktree,
+  createWorktreeExistingBranch
 } from '../../utils/git.js';
 
 /**
@@ -33,14 +37,17 @@ function startCommand(args) {
   let ticketId = args[0];
   let baseBranch = null;
   let updateStatus = true;
-  
+  let useWorktree = false;
+
   // Process additional arguments
   for (let i = 1; i < args.length; i++) {
     if (args[i] === '--base' && i + 1 < args.length) {
       baseBranch = args[i + 1];
-      i++; // Skip the next argument as it's the base branch
+      i++;
     } else if (args[i] === '--update-status' || args[i] === '-u') {
       updateStatus = true;
+    } else if (args[i] === '--worktree' || args[i] === '-w') {
+      useWorktree = true;
     }
   }
   
@@ -111,70 +118,126 @@ function startCommand(args) {
     ? `${branchPrefix}${slug}` 
     : `${branchPrefix}${ticketId}-${slug}`;
   
-  // Check if there are uncommitted changes
-  const gitStatus = getGitStatus();
-  if (gitStatus) {
-    console.warn('⚠️  You have uncommitted changes. Stash or commit them before switching branches.');
-    console.log('');
-  }
-  
-  // Check if the branch already exists
-  const branchExistsLocal = branchExistsLocally(branchName);
-  const branchExistsRemote = branchExistsRemotely(branchName);
-  
-  if (branchExistsLocal || branchExistsRemote) {
-    console.log(`🔍 Branch ${branchName} already exists.`);
-    
-    // Checkout the existing branch
-    if (checkoutBranch(branchName)) {
-      console.log(`✅ Switched to branch: ${branchName}`);
+  if (useWorktree) {
+    const repoName = getRepoName();
+    const worktreePath = getWorktreePath(repoName, branchName);
+
+    if (fs.existsSync(worktreePath)) {
+      console.log(`🔍 Worktree already exists at: ${worktreePath}`);
+      console.log(`✅ Ready to work in: ${worktreePath}`);
     } else {
-      console.error(`❌ Failed to switch to branch: ${branchName}`);
-      process.exit(1);
+      const branchExistsLocal = branchExistsLocally(branchName);
+      const branchExistsRemote = branchExistsRemotely(branchName);
+
+      try {
+        if (branchExistsLocal || branchExistsRemote) {
+          console.log(`🔍 Creating worktree for existing branch: ${branchName}`);
+          createWorktreeExistingBranch(worktreePath, branchName);
+        } else {
+          console.log(`🔍 Creating worktree with new branch: ${branchName}`);
+          createWorktree(worktreePath, branchName, baseBranch);
+        }
+        console.log(`✅ Worktree created at: ${worktreePath}`);
+      } catch (error) {
+        console.error(`❌ Failed to create worktree: ${error.message}`);
+        process.exit(1);
+      }
     }
-  } else {
-    console.log(`🔍 Creating new branch: ${branchName}`);
-    
-    // Create and checkout the new branch
-    if (createAndCheckoutBranch(branchName, baseBranch)) {
-      console.log(`✅ Created and switched to branch: ${branchName}`);
-    } else {
-      console.error(`❌ Failed to create branch: ${branchName}`);
-      process.exit(1);
-    }
-  }
-  
-  // Update ticket status if requested
-  if (updateStatus) {
+
+    // Store worktree_path in ticket frontmatter
     try {
-      // Read the ticket file
-      const ticketContent = fs.readFileSync(ticketPath, 'utf-8');
-      
-      // Get current timestamp in ISO format
+      const currentContent = fs.readFileSync(ticketPath, 'utf-8');
       const now = new Date().toISOString();
-      
-      // Update the status to in_progress and update the timestamp
-      let updatedContent = ticketContent
-        .replace(/^status: (.+)$/m, 'status: in_progress')
-        .replace(/^updated_at: (.+)$/m, `updated_at: ${now}`);
-      
-      // Write the updated content back to the file
+      let updatedContent = currentContent;
+
+      if (updatedContent.match(/^worktree_path: .+$/m)) {
+        updatedContent = updatedContent.replace(/^worktree_path: .+$/m, `worktree_path: "${worktreePath}"`);
+      } else {
+        updatedContent = updatedContent.replace(/^(updated_at: .+)$/m, `$1\nworktree_path: "${worktreePath}"`);
+      }
+
+      if (updateStatus) {
+        updatedContent = updatedContent
+          .replace(/^status: (.+)$/m, 'status: in_progress')
+          .replace(/^updated_at: (.+)$/m, `updated_at: "${now}"`);
+      }
+
       fs.writeFileSync(ticketPath, updatedContent, 'utf-8');
-      
-      console.log(`✅ Updated ticket status to: in_progress`);
-      console.log(`✅ Updated timestamp to: ${now}`);
+      if (updateStatus) {
+        console.log(`✅ Updated ticket status to: in_progress`);
+      }
     } catch (error) {
-      console.error(`❌ Failed to update ticket status: ${error.message}`);
+      console.error(`❌ Failed to update ticket: ${error.message}`);
     }
+
+    console.log('');
+    console.log(`🎯 Now working on: ${ticketId} - ${title}`);
+    console.log(`🌿 Branch: ${branchName}`);
+    console.log(`📂 Worktree: ${worktreePath}`);
+    console.log('');
+    console.log('To start working in the worktree:');
+    console.log(`  cd ${worktreePath}`);
+    console.log('');
+    console.log('💡 Run `npm install` in the worktree to install dependencies.');
+  } else {
+    // Check if there are uncommitted changes
+    const gitStatus = getGitStatus();
+    if (gitStatus) {
+      console.warn('⚠️  You have uncommitted changes. Stash or commit them before switching branches.');
+      console.log('');
+    }
+
+    // Check if the branch already exists
+    const branchExistsLocal = branchExistsLocally(branchName);
+    const branchExistsRemote = branchExistsRemotely(branchName);
+
+    if (branchExistsLocal || branchExistsRemote) {
+      console.log(`🔍 Branch ${branchName} already exists.`);
+
+      if (checkoutBranch(branchName)) {
+        console.log(`✅ Switched to branch: ${branchName}`);
+      } else {
+        console.error(`❌ Failed to switch to branch: ${branchName}`);
+        process.exit(1);
+      }
+    } else {
+      console.log(`🔍 Creating new branch: ${branchName}`);
+
+      if (createAndCheckoutBranch(branchName, baseBranch)) {
+        console.log(`✅ Created and switched to branch: ${branchName}`);
+      } else {
+        console.error(`❌ Failed to create branch: ${branchName}`);
+        process.exit(1);
+      }
+    }
+
+    // Update ticket status if requested
+    if (updateStatus) {
+      try {
+        const currentContent = fs.readFileSync(ticketPath, 'utf-8');
+        const now = new Date().toISOString();
+
+        let updatedContent = currentContent
+          .replace(/^status: (.+)$/m, 'status: in_progress')
+          .replace(/^updated_at: (.+)$/m, `updated_at: ${now}`);
+
+        fs.writeFileSync(ticketPath, updatedContent, 'utf-8');
+
+        console.log(`✅ Updated ticket status to: in_progress`);
+        console.log(`✅ Updated timestamp to: ${now}`);
+      } catch (error) {
+        console.error(`❌ Failed to update ticket status: ${error.message}`);
+      }
+    }
+
+    // Summary
+    console.log('');
+    console.log(`🎯 Now working on: ${ticketId} - ${title}`);
+    console.log(`🌿 Branch: ${branchName}`);
+    console.log('');
+    console.log('To push this branch to remote:');
+    console.log(`  git push -u origin ${branchName}`);
   }
-  
-  // Summary
-  console.log('');
-  console.log(`🎯 Now working on: ${ticketId} - ${title}`);
-  console.log(`🌿 Branch: ${branchName}`);
-  console.log('');
-  console.log('To push this branch to remote:');
-  console.log(`  git push -u origin ${branchName}`);
 }
 
 export default startCommand;

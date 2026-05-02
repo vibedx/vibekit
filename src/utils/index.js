@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
+import { getRepoRoot, getMainWorktreeRoot } from './git.js';
 
 /**
  * Get the path to the tickets directory from config or use default
@@ -9,9 +10,26 @@ import yaml from 'js-yaml';
  * @returns {string} Absolute path to the tickets directory
  * @throws {Error} Logs error but doesn't throw - returns default path
  */
+function getProjectRoot() {
+  const cwd = process.cwd();
+  if (fs.existsSync(path.join(cwd, '.vibe'))) {
+    return cwd;
+  }
+  // Only resolve to main worktree when cwd IS a worktree root (not a subdirectory)
+  const repoRoot = getRepoRoot();
+  if (repoRoot && repoRoot === cwd) {
+    const mainRoot = getMainWorktreeRoot();
+    if (mainRoot && mainRoot !== cwd && fs.existsSync(path.join(mainRoot, '.vibe'))) {
+      return mainRoot;
+    }
+  }
+  return cwd;
+}
+
 function getTicketsDir() {
-  const configPath = path.join(process.cwd(), '.vibe', 'config.yml');
-  let ticketDir = path.join(process.cwd(), '.vibe', 'tickets');
+  const root = getProjectRoot();
+  const configPath = path.join(root, '.vibe', 'config.yml');
+  let ticketDir = path.join(root, '.vibe', 'tickets');
   
   try {
     if (fs.existsSync(configPath)) {
@@ -19,7 +37,7 @@ function getTicketsDir() {
       const config = yaml.load(configContent) || {};
       
       if (config.tickets?.path && typeof config.tickets.path === 'string') {
-        const customPath = path.resolve(process.cwd(), config.tickets.path);
+        const customPath = path.resolve(root, config.tickets.path);
         ticketDir = customPath;
       }
     }
@@ -40,7 +58,8 @@ function getTicketsDir() {
  * console.log(config.tickets?.path); // Access tickets path
  */
 function getConfig() {
-  const configPath = path.join(process.cwd(), '.vibe', 'config.yml');
+  const root = getProjectRoot();
+  const configPath = path.join(root, '.vibe', 'config.yml');
   let config = {};
   
   try {
@@ -180,10 +199,12 @@ function createFullSlug(ticketId, slugText) {
  * @returns {string} Absolute path to the config.yml file
  */
 function getConfigPath() {
-  return path.join(process.cwd(), '.vibe', 'config.yml');
+  const root = getProjectRoot();
+  return path.join(root, '.vibe', 'config.yml');
 }
 
 export {
+  getProjectRoot,
   getTicketsDir,
   getConfig,
   getConfigPath,
