@@ -9,14 +9,15 @@
 
 members: {}
   # Example:
-  # mani-yadv:
-  #   name: Mani
-  #   github: mani-yadv
+  # alice-smith:
+  #   name: Alice Smith
+  #   github: alice-smith
   #   slack: U0XXXXXXXX
-  #   x: vernon1943
+  #   x: alice_on_x
   #   role: Founder
-  # opusaku:
-  #   name: Opus
-  #   github: opusaku
-  #   slack: U0XXXXXXXX
+  # bob-johnson:
+  #   name: Bob Johnson
+  #   github: bob-johnson
+  #   slack: U1XXXXXXXX
+  #   x: bob_on_x
   #   role: Senior Engineer
