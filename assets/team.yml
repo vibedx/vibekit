@@ -7,7 +7,9 @@
 #   vibe team remove <id>                  - Remove a member
 #   vibe new "task" --assignee <id>        - Assign ticket to member
 #
-# Example — replace with your actual team details:
+# No need to edit this file manually — use the CLI commands above.
+# But if you prefer to edit directly, just add entries under `members:`
+# like this:
 #
 #   members:
 #     jane-doe:
