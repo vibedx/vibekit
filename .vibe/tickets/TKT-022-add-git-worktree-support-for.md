@@ -2,12 +2,12 @@
 id: TKT-022
 title: Add git worktree support for parallel ticket work
 slug: TKT-022-add-git-worktree-support-for
-status: open
+status: closed
 priority: medium
 assignee: "opusaku"
 author: ""
 created_at: 2026-04-11T12:05:08.135Z
-updated_at: 2026-04-11T12:05:08.135Z
+updated_at: 2026-05-04T00:00:00.000Z
 approval_ts: "1777728758.103499"
 approval_channel: "C0ARRPJ3RJT"
 approval_state: "pending"
@@ -21,13 +21,13 @@ Currently `vibe start TKT-XXX` creates a branch and switches to it — blocking 
 
 ## Acceptance Criteria
 
-- [ ] New flag `vibe start TKT-XXX --worktree` creates a git worktree instead of switching branches in the current directory
-- [ ] Worktree path configurable via `config.yml` (default `.vibe/worktrees/`)
-- [ ] `vibe close TKT-XXX` cleans up the worktree after closing
-- [ ] `vibe list` shows which tickets have active worktrees
-- [ ] Handles edge cases: worktree already exists, dirty worktree, detached HEAD
-- [ ] Documented in README and SKILL.md
-- [ ] Unit tests covering worktree create/remove/list
+- [x] New flag `vibe start TKT-XXX --worktree` creates a git worktree instead of switching branches in the current directory
+- [x] Worktree path configurable via `config.yml` (default `.vibe/worktrees/`)
+- [x] `vibe close TKT-XXX` cleans up the worktree after closing
+- [x] `vibe list` shows which tickets have active worktrees
+- [x] Handles edge cases: worktree already exists, dirty worktree, detached HEAD
+- [x] Documented in README and SKILL.md
+- [x] Unit tests covering worktree create/remove/list
 
 ## Code Quality
 
