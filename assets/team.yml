@@ -6,18 +6,21 @@
 #   vibe team add <id> --name "Name" ...   - Add a member
 #   vibe team remove <id>                  - Remove a member
 #   vibe new "task" --assignee <id>        - Assign ticket to member
+#
+# Example — replace with your actual team details:
+#
+#   members:
+#     jane-doe:
+#       name: Jane Doe
+#       github: jane-doe
+#       slack: U04ABC12DEF
+#       x: janedoe
+#       role: Founder
+#     john-smith:
+#       name: John Smith
+#       github: john-smith
+#       slack: U05XYZ34GHI
+#       x: johnsmith
+#       role: Engineer
 
 members: {}
-  # Example:
-  # alice-smith:
-  #   name: Alice Smith
-  #   github: alice-smith
-  #   slack: U0XXXXXXXX
-  #   x: alice_on_x
-  #   role: Founder
-  # bob-johnson:
-  #   name: Bob Johnson
-  #   github: bob-johnson
-  #   slack: U1XXXXXXXX
-  #   x: bob_on_x
-  #   role: Senior Engineer
