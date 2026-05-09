@@ -1,14 +1,15 @@
 ---
 id: TKT-025
-title: Update skills SKILL.md with new features and inject vibekit skill into spawned agents
+title: >-
+  Update skills SKILL.md with new features and inject vibekit skill into spawned
+  agents
 slug: TKT-025-update-skills-skill-md-with
-status: in_progress
+status: done
 priority: high
-assignee: "opusaku"
-author: ""
+assignee: opusaku
+author: ''
 created_at: 2026-05-09T12:47:53.361Z
-updated_at: "2026-05-09T12:47:58.021Z"
-worktree_path: "null"
+updated_at: '2026-05-09T12:49:37.196Z'
 ---
 
 ## Description

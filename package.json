@@ -1,6 +1,6 @@
 {
   "name": "@vibedx/vibekit",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "description": "A powerful CLI tool for managing development tickets and project workflows",
   "main": "index.js",
   "type": "module",
