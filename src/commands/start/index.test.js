@@ -79,10 +79,21 @@ describe('start command', () => {
     });
   });
 
-  // Note: Full git integration testing would require:
-  // - Proper git repository setup
-  // - Mocking all git utility functions
-  // - Testing branch creation and checkout
-  // - Testing ticket status updates
-  // This is better handled in integration tests with proper git mocking
+  describe('--agent flag validation', () => {
+    it('should error when --agent used without -w for multiple tickets', () => {
+      // Arrange
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-001', title: 'First', status: 'open' },
+          { id: 'TKT-002', title: 'Second', status: 'open' }
+        ]
+      });
+
+      // Act
+      expect(() => startCommand(['TKT-001', 'TKT-002', '--agent'])).toThrow('process.exit(1)');
+
+      // Assert
+      expect(consoleMock.logs.error[0]).toContain('--agent without -w only supports a single ticket');
+    });
+  });
 });

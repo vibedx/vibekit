@@ -137,7 +137,7 @@ function startCommand(args) {
     console.error('');
     console.error('Options:');
     console.error('  -w, --worktree     Create worktrees for tickets');
-    console.error('  --agent            Spawn Claude agents in worktrees (requires -w)');
+    console.error('  --agent            Spawn Claude agents to work on tickets');
     console.error('  --status=<status>  Start all tickets with this status (e.g. --status=open)');
     console.error('  --base <branch>    Base branch for new branches/worktrees (default: main)');
     console.error('  --dry-run          Show what would happen without doing it');
@@ -182,11 +182,11 @@ function startCommand(args) {
     process.exit(1);
   }
 
-  const useWorktree = flags.worktree || flags.agent;
+  const useWorktree = flags.worktree;
   const spawnAgent = flags.agent;
 
-  if (spawnAgent && !useWorktree) {
-    console.error('❌ --agent requires -w (worktree mode).');
+  if (spawnAgent && !useWorktree && tickets.length > 1) {
+    console.error('❌ --agent without -w only supports a single ticket. Use -w for multiple tickets.');
     process.exit(1);
   }
 
@@ -265,6 +265,7 @@ function startCommand(args) {
     }
 
     if (spawnAgent) {
+      const agentTimeout = config.agent?.timeout || 900;
       console.log('\n🤖 Spawning Claude agents...\n');
       for (const info of worktreeInfos) {
         const ticketContent = fs.readFileSync(info.ticket.filePath, 'utf-8');
@@ -273,14 +274,14 @@ function startCommand(args) {
           : `You are working on ticket ${info.ticket.frontmatter.id}: ${info.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.`;
 
         try {
-          const agentProcess = spawn('claude', ['-p', prompt, '--allowedTools', 'Edit,Write,Bash,Read,Glob,Grep'], {
+          const agentProcess = spawn('claude', ['-p', prompt, '--timeout', String(agentTimeout * 1000)], {
             cwd: info.worktreePath,
             stdio: 'ignore',
             detached: true
           });
 
           agentProcess.unref();
-          console.log(`  🤖 ${info.ticket.frontmatter.id}: Agent spawned in ${info.worktreePath}`);
+          console.log(`  🤖 ${info.ticket.frontmatter.id}: Agent spawned in ${info.worktreePath} (timeout: ${agentTimeout}s)`);
         } catch (error) {
           console.error(`  ❌ ${info.ticket.frontmatter.id}: Failed to spawn agent — ${error.message}`);
         }
@@ -318,9 +319,36 @@ function startCommand(args) {
       updateTicketStatus(ticket, null);
     }
 
-    console.log('\n🏁 Branches ready!\n');
-    console.log('To switch to a branch:');
-    console.log(`  git checkout ${getBranchName(tickets[0], config)}`);
+    if (spawnAgent) {
+      const ticket = tickets[0];
+      const agentTimeout = config.agent?.timeout || 900;
+      const ticketContent = fs.readFileSync(ticket.filePath, 'utf-8');
+      const prompt = flags.prompt
+        ? flags.prompt
+        : `You are working on ticket ${ticket.frontmatter.id}: ${ticket.frontmatter.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.`;
+
+      console.log('\n🤖 Spawning Claude agent...\n');
+      try {
+        const agentProcess = spawn('claude', ['-p', prompt, '--timeout', String(agentTimeout * 1000)], {
+          cwd: process.cwd(),
+          stdio: 'ignore',
+          detached: true
+        });
+
+        agentProcess.unref();
+        console.log(`  🤖 ${ticket.frontmatter.id}: Agent spawned (timeout: ${agentTimeout}s)`);
+        console.log('\n🏁 Agent launched!\n');
+        console.log('Monitor progress:');
+        console.log('  vibe status          # see ticket status');
+        console.log('  vibe list --status=in_progress # see in-progress tickets');
+      } catch (error) {
+        console.error(`  ❌ ${ticket.frontmatter.id}: Failed to spawn agent — ${error.message}`);
+      }
+    } else {
+      console.log('\n🏁 Branches ready!\n');
+      console.log('To switch to a branch:');
+      console.log(`  git checkout ${getBranchName(tickets[0], config)}`);
+    }
   }
 }
 

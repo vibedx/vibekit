@@ -24,6 +24,9 @@ tickets:
 team:
   path: .vibe/team.yml
 
+agent:
+  timeout: 900
+
 ai:
   enabled: false
 
