@@ -32,3 +32,5 @@ review:
   acceptance_threshold: 85
   good_threshold: 80
   warning_threshold: 60
+agent:
+  timeout: 900

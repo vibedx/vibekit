@@ -2,7 +2,7 @@
 id: TKT-024
 title: vibe start agent enhancements - non-worktree mode, timeout, full tool access
 slug: TKT-024-vibe-start-agent-enhancements
-status: in_progress
+status: done
 priority: high
 assignee: opus
 author: opus
@@ -19,12 +19,12 @@ Enhance `vibe start` to support spawning Claude agents without requiring worktre
 
 ## Acceptance Criteria
 
-- [ ] `vibe start TKT-001 --agent` works without `-w` flag (spawns agent in current directory)
-- [ ] Agent timeout defaults to 15 minutes (900 seconds)
-- [ ] Timeout is configurable via `.vibe/config.yml` under `agent.timeout`
-- [ ] Agents are spawned with all tool access (no restricted `--allowedTools` list)
-- [ ] Multiple tickets with `-w --agent` still work as before
-- [ ] Tests updated for new behavior
+- [x] `vibe start TKT-001 --agent` works without `-w` flag (spawns agent in current directory)
+- [x] Agent timeout defaults to 15 minutes (900 seconds)
+- [x] Timeout is configurable via `.vibe/config.yml` under `agent.timeout`
+- [x] Agents are spawned with all tool access (no restricted `--allowedTools` list)
+- [x] Multiple tickets with `-w --agent` still work as before
+- [x] Tests updated for new behavior
 
 ## Implementation Notes
 
