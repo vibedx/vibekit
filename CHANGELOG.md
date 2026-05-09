@@ -5,6 +5,23 @@ All notable changes to VibeKit will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-05-09
+
+### Added
+- **`vibe pr`** — open GitHub PRs from ticket branches
+  - `vibe pr` for current branch, `vibe pr --all` for all worktrees
+  - Auto-populates title/body from ticket content, sets status to `review`
+  - Supports `--draft` and `--dry-run` flags
+- **`vibe status`** — show active worktrees and ticket status at a glance
+- **`vibe start --agent`** — spawn Claude Code agents to work on tickets
+  - Works without `-w` for single tickets (agent runs in current directory)
+  - Agent timeout defaults to 15 minutes, configurable via `.vibe/config.yml`
+  - Full tool access for spawned agents
+
+### Fixed
+- Slug type coercion in `getBranchName` preventing TypeError on numeric slugs
+- Ticket cleanup: removed non-template fields, closed completed tickets (TKT-019, TKT-023)
+
 ## [0.1.0] - 2024-12-14
 
 ### Added
