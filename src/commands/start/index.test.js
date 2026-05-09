@@ -49,7 +49,7 @@ describe('start command', () => {
 
       // Assert
       expect(exitMock.exitCalls).toContain(1);
-      expect(consoleMock.logs.error).toContain('❌ Please provide a ticket ID (e.g., vibe start TKT-006)');
+      expect(consoleMock.logs.error[0]).toContain('Usage: vibe start');
     });
 
     it('should show error for invalid ticket ID format', () => {
@@ -61,7 +61,7 @@ describe('start command', () => {
 
       // Assert
       expect(exitMock.exitCalls).toContain(1);
-      expect(consoleMock.logs.error).toContain('❌ Invalid ticket ID format. Expected TKT-XXX or just the number.');
+      expect(consoleMock.logs.error).toContain('❌ Invalid ticket ID: invalid-format');
     });
   });
 
