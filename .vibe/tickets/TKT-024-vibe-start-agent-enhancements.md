@@ -6,8 +6,8 @@ status: done
 priority: high
 assignee: opus
 author: opus
-created_at: "2026-05-09T00:00:00.000Z"
-updated_at: "2026-05-09T00:00:00.000Z"
+created_at: '2026-05-09T00:00:00.000Z'
+updated_at: '2026-05-09T00:00:00.000Z'
 ---
 
 ## Description
@@ -18,7 +18,7 @@ Enhance `vibe start` to support spawning Claude agents without requiring worktre
 
 - [x] `vibe start TKT-001 --agent` works without `-w` flag (spawns agent in current directory)
 - [x] Agent timeout defaults to 15 minutes (900 seconds)
-- [x] Timeout is configurable via `.vibe/config.yml` under `agent.timeout`
+- [x] Timeout is configurable via `.vibe/config.yml` under `worktree.agent.timeout`
 - [x] Agents are spawned with all tool access (no restricted `--allowedTools` list)
 - [x] Multiple tickets with `-w --agent` still work as before
 - [x] Tests updated for new behavior
@@ -26,7 +26,7 @@ Enhance `vibe start` to support spawning Claude agents without requiring worktre
 ## Implementation Notes
 
 - Remove the guard that requires `-w` with `--agent`
-- Add `agent` section to config schema: `agent.timeout` (default: 900)
+- Add `worktree.agent` section to config schema: `worktree.agent.timeout` (default: 900)
 - Pass `--timeout` flag to claude CLI
 - Remove `--allowedTools` restriction from spawn call
 - When `--agent` is used without `-w` for a single ticket, spawn in cwd
