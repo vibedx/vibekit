@@ -265,7 +265,7 @@ function startCommand(args) {
     }
 
     if (spawnAgent) {
-      const agentTimeout = config.agent?.timeout || 900;
+      const agentTimeout = config.worktree?.agent?.timeout || 900;
       console.log('\n🤖 Spawning Claude agents...\n');
       for (const info of worktreeInfos) {
         const ticketContent = fs.readFileSync(info.ticket.filePath, 'utf-8');
@@ -321,7 +321,7 @@ function startCommand(args) {
 
     if (spawnAgent) {
       const ticket = tickets[0];
-      const agentTimeout = config.agent?.timeout || 900;
+      const agentTimeout = config.worktree?.agent?.timeout || 900;
       const ticketContent = fs.readFileSync(ticket.filePath, 'utf-8');
       const prompt = flags.prompt
         ? flags.prompt
