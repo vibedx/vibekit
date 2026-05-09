@@ -8,9 +8,6 @@ assignee: opus
 author: opus
 created_at: "2026-05-09T00:00:00.000Z"
 updated_at: "2026-05-09T00:00:00.000Z"
-approval_ts: "1778326982.236559"
-approval_channel: "C0ARRPJ3RJT"
-approval_state: "pending"
 ---
 
 ## Description

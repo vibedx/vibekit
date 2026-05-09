@@ -95,7 +95,7 @@ function loadTicketsByStatus(ticketsDir, status) {
 
 function getBranchName(ticket, config) {
   const branchPrefix = config.git?.branch_prefix || '';
-  const slug = ticket.frontmatter.slug || ticket.frontmatter.id;
+  const slug = String(ticket.frontmatter.slug || ticket.frontmatter.id);
   return slug.includes(ticket.frontmatter.id)
     ? `${branchPrefix}${slug}`
     : `${branchPrefix}${ticket.frontmatter.id}-${slug}`;

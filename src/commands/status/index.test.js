@@ -42,7 +42,7 @@ describe('status command', () => {
       statusCommand([]);
 
       // Assert
-      expect(consoleMock.logs.log[0]).toContain('Active Worktrees');
+      expect(consoleMock.logs.log[0]).toContain('No active worktrees');
     });
   });
 });

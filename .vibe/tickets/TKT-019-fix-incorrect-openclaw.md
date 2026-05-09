@@ -2,7 +2,7 @@
 id: TKT-019
 title: Fix incorrect OpenClaw command reference in documentation
 slug: TKT-019-fix-incorrect-openclaw
-status: open
+status: done
 priority: medium
 created_at: 2026-02-24T21:30:20.363Z
 updated_at: 2026-02-24T21:30:20.363Z

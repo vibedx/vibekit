@@ -8,9 +8,6 @@ assignee: "opusaku"
 author: ""
 created_at: 2026-04-11T12:05:08.135Z
 updated_at: 2026-05-04T00:00:00.000Z
-approval_ts: "1777728758.103499"
-approval_channel: "C0ARRPJ3RJT"
-approval_state: "pending"
 ---
 
 ## Description

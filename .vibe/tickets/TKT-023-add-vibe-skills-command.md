@@ -2,7 +2,7 @@
 id: TKT-023
 title: Add `vibe skills` command for one-command skill installation
 slug: TKT-023-add-vibe-skills-command
-status: in-progress
+status: done
 priority: medium
 assignee: "opusaku"
 author: "opusaku"
