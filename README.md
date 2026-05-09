@@ -106,6 +106,9 @@ vibe list
 vibe list --status=open
 vibe list --assignee=alice
 
+# Check active worktrees and ticket progress
+vibe status
+
 # Close/complete a ticket
 vibe close TKT-001
 
@@ -116,6 +119,10 @@ vibe start TKT-001 --base main --update-status
 # Start in a separate worktree (parallel work without switching branches)
 vibe start TKT-001 --worktree
 vibe start TKT-001 -w
+
+# Spawn a Claude agent to work on a ticket automatically
+vibe start TKT-001 --agent                  # Single ticket, current directory
+vibe start TKT-001 TKT-002 -w --agent       # Multiple tickets in worktrees with agents
 ```
 
 ### 👥 Team Management
@@ -258,6 +265,43 @@ $ vibe list
 $ vibe close TKT-005
 🗑️  Removed worktree at ~/.vibekit/worktrees/myproject/feature--TKT-005-add-api-cache/
 ✅ Closed TKT-005
+```
+
+### Autonomous Development with Claude Agents
+```bash
+# Spawn a Claude agent to work on a single ticket
+$ vibe start TKT-006 --agent
+🤖 Starting Claude agent for TKT-006...
+⏱️  Agent timeout: 15 minutes (configurable in .vibe/config.yml)
+✨ Agent has full tool access (git, file I/O, CLI)
+
+# Agent automatically:
+• Creates the branch and updates ticket to in_progress
+• Reads ticket requirements and implements the work
+• Commits changes with clear commit messages
+• Marks ticket as done when complete (or in_progress if changes needed)
+
+# Work on multiple tickets with agents in parallel worktrees
+$ vibe start TKT-006 TKT-007 TKT-008 -w --agent
+🌿 Creating 3 worktrees with Claude agents...
+🤖 Agent 1 working on TKT-006
+🤖 Agent 2 working on TKT-007
+🤖 Agent 3 working on TKT-008
+
+# Monitor progress
+$ vibe status
+Active Worktrees:
+  🌿 feature/TKT-006-... (TKT-006: in_progress) 🤖 Agent running...
+  🌿 feature/TKT-007-... (TKT-007: in_progress) 🤖 Agent running...
+  🌿 feature/TKT-008-... (TKT-008: in_progress) 🤖 Agent running...
+```
+
+### Agent Configuration
+```yaml
+# In .vibe/config.yml
+worktree:
+  agent:
+    timeout: 900  # 15 minutes (seconds), increase for complex work
 ```
 
 ### Quality Control with Lint
