@@ -3,6 +3,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { execSync, spawn } from 'child_process';
 import { getTicketsDir, getConfig, createSlug } from '../../utils/index.js';
+import { fileURLToPath } from 'url';
 import {
   isGitRepository,
   getCurrentBranch,
@@ -18,6 +19,16 @@ import {
   getRepoRoot,
   getDefaultBaseBranch
 } from '../../utils/git.js';
+
+function loadSkillContext() {
+  try {
+    const __dirname = path.dirname(fileURLToPath(import.meta.url));
+    const skillPath = path.join(__dirname, '..', '..', '..', 'skills', 'vibekit', 'SKILL.md');
+    return fs.readFileSync(skillPath, 'utf-8');
+  } catch {
+    return '';
+  }
+}
 
 function parseTicketIds(args) {
   const ids = [];
@@ -266,12 +277,13 @@ function startCommand(args) {
 
     if (spawnAgent) {
       const agentTimeout = config.worktree?.agent?.timeout || 900;
+      const skillContext = loadSkillContext();
       console.log('\n🤖 Spawning Claude agents...\n');
       for (const info of worktreeInfos) {
         const ticketContent = fs.readFileSync(info.ticket.filePath, 'utf-8');
         const prompt = flags.prompt
           ? flags.prompt
-          : `You are working on ticket ${info.ticket.frontmatter.id}: ${info.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.`;
+          : `You are working on ticket ${info.ticket.frontmatter.id}: ${info.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.${skillContext ? `\n\n--- VibeKit Skill Reference ---\n${skillContext}` : ''}`;
 
         try {
           const agentProcess = spawn('claude', ['-p', prompt, '--timeout', String(agentTimeout * 1000)], {
@@ -322,10 +334,11 @@ function startCommand(args) {
     if (spawnAgent) {
       const ticket = tickets[0];
       const agentTimeout = config.worktree?.agent?.timeout || 900;
+      const skillContext = loadSkillContext();
       const ticketContent = fs.readFileSync(ticket.filePath, 'utf-8');
       const prompt = flags.prompt
         ? flags.prompt
-        : `You are working on ticket ${ticket.frontmatter.id}: ${ticket.frontmatter.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.`;
+        : `You are working on ticket ${ticket.frontmatter.id}: ${ticket.frontmatter.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.${skillContext ? `\n\n--- VibeKit Skill Reference ---\n${skillContext}` : ''}`;
 
       console.log('\n🤖 Spawning Claude agent...\n');
       try {
