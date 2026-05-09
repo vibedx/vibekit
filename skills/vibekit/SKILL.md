@@ -60,6 +60,11 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe list` | List all tickets |
 | `vibe start <id>` | Start work (creates git branch) |
 | `vibe start <id> --worktree` | Start work in a separate worktree |
+| `vibe start <id> --agent` | Spawn a Claude agent to work on the ticket |
+| `vibe start <id> <id2> -w --agent` | Spawn agents in parallel worktrees |
+| `vibe status` | Show active worktrees and ticket progress |
+| `vibe pr` | Open a GitHub PR from the current ticket branch |
+| `vibe pr --all` | Open PRs for all worktree branches |
 | `vibe close <id>` | Mark ticket done (cleans up worktree if any) |
 | `vibe lint` | Validate ticket format |
 | `vibe lint --fix` | Auto-fix missing sections |
@@ -176,6 +181,63 @@ vibe close TKT-002 --force
 
 `vibe list` shows a 🌿 indicator next to tickets with active worktrees.
 
+### Spawning Claude Agents
+
+Use `--agent` to spawn a Claude Code agent that autonomously works on a ticket:
+
+```bash
+# Single ticket — agent works in the current directory
+vibe start TKT-003 --agent
+
+# Multiple tickets — each gets its own worktree + agent
+vibe start TKT-003 TKT-004 TKT-005 -w --agent
+```
+
+Agents automatically:
+- Read the ticket requirements and implement the work
+- Commit changes with ticket references
+- Mark the ticket as `done` when complete (or `in_progress` if further changes needed)
+- Have full tool access (git, file I/O, CLI)
+- Receive the vibekit skill context so they know how to use vibe commands
+
+Agent timeout defaults to 15 minutes (900s). Configure in `.vibe/config.yml`:
+
+```yaml
+worktree:
+  agent:
+    timeout: 900  # seconds
+```
+
+### Opening Pull Requests
+
+Use `vibe pr` to open GitHub PRs from ticket branches:
+
+```bash
+# PR for the current branch
+vibe pr
+
+# PRs for specific tickets
+vibe pr TKT-003 TKT-004
+
+# PRs for all worktree branches
+vibe pr --all
+
+# Draft PR
+vibe pr --draft
+```
+
+PR title and body are auto-populated from ticket content. Ticket status is set to `review`.
+
+### Monitoring Progress
+
+```bash
+# Show active worktrees and agent status
+vibe status
+
+# List in-progress tickets
+vibe list --status=in_progress
+```
+
 ## Automation Pattern
 
 For bots and automated agents working through tickets:
@@ -186,10 +248,10 @@ vibe list --assignee=mybotname --status=open
 
 # For each ticket:
 # 1. Read .vibe/tickets/TKT-XXX-*.md for full context
-# 2. Do the work on branch opus/<ticket-id>-<description>
+# 2. Do the work on branch feature/<ticket-id>-<slug>
 # 3. Commit changes
-# 4. Close: vibe close TKT-XXX
-# 5. Notify team
+# 4. Open PR: vibe pr
+# 5. Close: vibe close TKT-XXX
 ```
 
 ## Links
