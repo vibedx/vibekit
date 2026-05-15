@@ -13,6 +13,7 @@
 
 <div align="center">
 
+[![skills.sh](https://skills.sh/b/vibedx/vibekit)](https://skills.sh/vibedx/vibekit)
 [![npm version](https://img.shields.io/npm/v/@vibedx/vibekit.svg)](https://www.npmjs.com/package/@vibedx/vibekit)
 [![npm downloads](https://img.shields.io/npm/dm/@vibedx/vibekit.svg)](https://www.npmjs.com/package/@vibedx/vibekit)
 [![GitHub license](https://img.shields.io/github/license/vibedx/vibekit.svg)](https://github.com/vibedx/vibekit/blob/main/LICENSE)
