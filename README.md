@@ -20,7 +20,7 @@
 
 **A CLI tool to help you vibe your code better** ✨  
 *Vibe your development workflow*  
-_vibekit uses vibekit to develop vibekit - we vibin!_ 🔄
+_vibekit uses vibekit to develop vibekit._ 🔄
 
 </div>
 
