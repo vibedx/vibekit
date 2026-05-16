@@ -18,7 +18,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/@vibedx/vibekit.svg)](https://www.npmjs.com/package/@vibedx/vibekit)
 [![GitHub license](https://img.shields.io/github/license/vibedx/vibekit.svg)](https://github.com/vibedx/vibekit/blob/main/LICENSE)
 
-**A CLI tool to help you vibe your code better** ✨  
+**A CLI tool to help you build with better flow** ✨  
 *Vibe your development workflow*  
 _vibekit uses vibekit to develop vibekit - we vibin!_ 🔄
 
