@@ -219,6 +219,7 @@ Always use \`vibe start\` to start working on this ticket and \`vibe close\` to 
     if (ticket.slug !== undefined) frontmatterLines.push(`slug: ${ticket.slug}`);
     if (ticket.status !== undefined) frontmatterLines.push(`status: ${ticket.status}`);
     if (ticket.priority !== undefined) frontmatterLines.push(`priority: ${ticket.priority}`);
+    if (ticket.assignee !== undefined) frontmatterLines.push(`assignee: ${ticket.assignee}`);
     if (ticket.created_at !== undefined) frontmatterLines.push(`created_at: ${ticket.created_at}`);
     if (ticket.updated_at !== undefined) frontmatterLines.push(`updated_at: ${ticket.updated_at}`);
     
