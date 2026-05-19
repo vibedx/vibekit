@@ -8,7 +8,6 @@ assignee: ""
 author: ""
 created_at: 2026-05-15T22:05:15.540Z
 updated_at: "2026-05-15T22:05:20.918Z"
-worktree_path: "null"
 ---
 
 ## Description
