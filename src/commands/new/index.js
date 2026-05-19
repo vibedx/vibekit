@@ -34,6 +34,8 @@ function parseArguments(args) {
   let status = DEFAULT_STATUS;
   let assignee = '';
   let author = '';
+  let description = '';
+  let acceptanceCriteria = '';
   let noInteractive = false;
 
   for (let i = 0; i < args.length; i++) {
@@ -51,6 +53,12 @@ function parseArguments(args) {
     } else if (arg === '--author' && i + 1 < args.length) {
       author = args[i + 1];
       i++;
+    } else if ((arg === '--description' || arg === '-d') && i + 1 < args.length) {
+      description = args[i + 1];
+      i++;
+    } else if (arg === '--acceptance-criteria' && i + 1 < args.length) {
+      acceptanceCriteria = args[i + 1];
+      i++;
     } else if (arg === '--no-interactive' || arg === '-n') {
       noInteractive = true;
     } else if (!arg.startsWith('--')) {
@@ -64,7 +72,7 @@ function parseArguments(args) {
     throw new Error('Please provide a title for the new ticket.');
   }
 
-  return { title, priority, status, assignee, author, noInteractive };
+  return { title, priority, status, assignee, author, description, acceptanceCriteria, noInteractive };
 }
 
 /**
@@ -103,11 +111,11 @@ function createTicketContent(template, ticketData) {
   if (typeof template !== 'string') {
     throw new Error('Template must be a string');
   }
-  
-  const { ticketId, title, slug, priority, status, assignee, author, timestamp } = ticketData;
+
+  const { ticketId, title, slug, priority, status, assignee, author, description, acceptanceCriteria, timestamp } = ticketData;
   const paddedId = ticketId.replace('TKT-', '');
 
-  return template
+  let content = template
     .replace(/{id}/g, paddedId)
     .replace(/{title}/g, title)
     .replace(/{slug}/g, slug)
@@ -116,6 +124,22 @@ function createTicketContent(template, ticketData) {
     .replace(/^status: .*$/m, `status: ${status}`)
     .replace(/^assignee: .*$/m, `assignee: "${assignee || ''}"`)
     .replace(/^author: .*$/m, `author: "${author || ''}"`);
+
+  if (description) {
+    content = content.replace(
+      /## Description\n\n<!-- .+? -->/s,
+      `## Description\n\n${description}`
+    );
+  }
+
+  if (acceptanceCriteria) {
+    content = content.replace(
+      /## Acceptance Criteria\n\n<!-- .+? -->/s,
+      `## Acceptance Criteria\n\n${acceptanceCriteria}`
+    );
+  }
+
+  return content;
 }
 
 /**
@@ -206,7 +230,7 @@ async function handleFileRename(originalPath, ticketDir) {
 async function newCommand(args) {
   try {
     // Parse and validate arguments
-    const { title, priority, status, assignee, author, noInteractive } = parseArguments(args);
+    const { title, priority, status, assignee, author, description, acceptanceCriteria, noInteractive } = parseArguments(args);
     
     // Check required files and paths
     const configPath = path.join(process.cwd(), '.vibe', 'config.yml');
@@ -251,6 +275,8 @@ async function newCommand(args) {
       status: validatedOptions.status,
       assignee,
       author,
+      description,
+      acceptanceCriteria,
       timestamp
     };
     

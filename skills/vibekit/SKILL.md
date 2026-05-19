@@ -86,7 +86,11 @@ vibe new "Add dark mode" --assignee bob --author alice -n
 - `--status open|in_progress|review|done` (default: open)
 - `--assignee <username>` — who works on it
 - `--author <username>` — who created it
+- `-d` / `--description "text"` — pre-fill the Description section
+- `--acceptance-criteria "- [ ] criterion 1\n- [ ] criterion 2"` — pre-fill Acceptance Criteria
 - `-n` / `--no-interactive` — skip AI enhancement prompt
+
+**AI agents should always provide `--description` and `--acceptance-criteria` when creating tickets.** This ensures tickets are actionable immediately without needing `vibe refine`. Fill in as much detail as possible based on the task context.
 
 ## Ticket Structure
 

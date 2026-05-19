@@ -116,10 +116,14 @@ function updateTicketStatus(ticket, worktreePath) {
   const now = new Date().toISOString();
   let updatedContent = ticket.content;
 
-  if (updatedContent.match(/^worktree_path: .+$/m)) {
-    updatedContent = updatedContent.replace(/^worktree_path: .+$/m, `worktree_path: "${worktreePath}"`);
+  if (worktreePath) {
+    if (updatedContent.match(/^worktree_path: .+$/m)) {
+      updatedContent = updatedContent.replace(/^worktree_path: .+$/m, `worktree_path: "${worktreePath}"`);
+    } else {
+      updatedContent = updatedContent.replace(/^(updated_at: .+)$/m, `$1\nworktree_path: "${worktreePath}"`);
+    }
   } else {
-    updatedContent = updatedContent.replace(/^(updated_at: .+)$/m, `$1\nworktree_path: "${worktreePath}"`);
+    updatedContent = updatedContent.replace(/^worktree_path: .+\n?/m, '');
   }
 
   updatedContent = updatedContent

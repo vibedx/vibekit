@@ -2,13 +2,12 @@
 id: TKT-027
 title: add vibe stats command for ticket dashboard summary
 slug: TKT-027-add-vibe-stats-command-for
-status: in_progress
+status: done
 priority: medium
-assignee: ""
-author: ""
+assignee: ''
+author: ''
 created_at: 2026-05-19T20:12:24.888Z
-updated_at: "2026-05-19T20:15:38.326Z"
-worktree_path: "null"
+updated_at: '2026-05-19T20:15:38.326Z'
 ---
 
 ## Description
