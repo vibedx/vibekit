@@ -134,7 +134,7 @@ describe('git utilities', () => {
 
       // Assert
       expect(result).toBe(true);
-      expect(mockExecSync).toHaveBeenCalledWith('git ls-remote --heads origin feature/test', { encoding: 'utf-8' });
+      expect(mockExecSync).toHaveBeenCalledWith('git ls-remote --heads origin feature/test', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
     });
 
     it('should return false when branch does not exist remotely', () => {
