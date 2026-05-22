@@ -13,26 +13,20 @@ import { getTicketsDir, getConfig, getNextTicketId, createSlug } from '../../uti
 function createSampleTicket(title, description, priority = "medium", status = "open") {
   const configPath = path.join(process.cwd(), ".vibe", "config.yml");
   const templatePath = path.join(process.cwd(), ".vibe", ".templates", "default.md");
-  
+
   if (!fs.existsSync(configPath) || !fs.existsSync(templatePath)) {
     console.error("❌ Missing config.yml or default.md template.");
     return false;
   }
-  
+
   const config = yaml.load(fs.readFileSync(configPath, "utf-8"));
   const template = fs.readFileSync(templatePath, "utf-8");
   const ticketDir = path.join(process.cwd(), config.tickets?.path || ".vibe/tickets");
-  
-  const files = fs.readdirSync(ticketDir);
-  const ticketNumbers = files
-    .map(f => f.match(/^TKT-(\\d+)/))
-    .filter(Boolean)
-    .map(match => parseInt(match[1], 10));
-  const nextId = Math.max(0, ...ticketNumbers) + 1;
-  const paddedId = String(nextId).padStart(3, "0");
+
+  const ticketId = getNextTicketId();
+  const paddedId = ticketId.replace('TKT-', '');
   const now = new Date().toISOString();
-  
-  const ticketId = `TKT-${paddedId}`;
+
   const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const filename = `${ticketId}-${slug}.md`;
   

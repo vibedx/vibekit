@@ -49,7 +49,7 @@ function branchExistsLocally(branchName) {
  */
 function branchExistsRemotely(branchName) {
   try {
-    const result = execSync(`git ls-remote --heads origin ${branchName}`, { encoding: 'utf-8' });
+    const result = execSync(`git ls-remote --heads origin ${branchName}`, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] });
     return result.trim() !== '';
   } catch (error) {
     return false;
@@ -158,7 +158,7 @@ function getMainWorktreeRoot() {
 
 function getRepoName() {
   try {
-    const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8' }).trim();
+    const remoteUrl = execSync('git remote get-url origin', { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'ignore'] }).trim();
     // Handle git@github.com:org/repo.git
     let match = remoteUrl.match(/[:/]([^/]+?)(?:\.git)?$/);
     if (match) return match[1];
