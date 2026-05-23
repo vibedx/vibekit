@@ -9,71 +9,54 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const TEMPLATES = [
-  { name: 'default', value: 'default', description: 'Minimal project conventions' },
-  { name: 'react', value: 'react', description: 'React/frontend best practices' },
-  { name: 'node', value: 'node', description: 'Node.js backend guidelines' },
-  { name: 'python', value: 'python', description: 'Python project conventions' },
-  { name: 'karpathy', value: 'karpathy', description: 'Karpathy-style dev philosophy' },
+  { name: 'default', value: 'default', category: 'coding', description: 'Minimal project conventions' },
+  { name: 'karpathy', value: 'karpathy', category: 'coding', description: 'Karpathy-style dev philosophy' },
+  { name: 'react', value: 'react', category: 'frameworks', description: 'React/frontend best practices' },
+  { name: 'node', value: 'node', category: 'languages', description: 'Node.js backend guidelines' },
+  { name: 'python', value: 'python', category: 'languages', description: 'Python project conventions' },
 ];
 
-function getTemplateDir(templateName) {
-  return path.join(__dirname, '../../../assets/templates', templateName);
+function getTemplatePath(templateName) {
+  const template = TEMPLATES.find(t => t.value === templateName);
+  if (!template) return null;
+  return path.join(__dirname, '../../../assets/standards', template.category, `${templateName}.md`);
 }
 
 function listTemplates() {
   console.log('\n📋 Available templates:\n');
-  for (const t of TEMPLATES) {
-    console.log(`  ${t.value.padEnd(20)} ${t.description}`);
+  const categories = [...new Set(TEMPLATES.map(t => t.category))];
+  for (const cat of categories) {
+    console.log(`  ${cat}/`);
+    for (const t of TEMPLATES.filter(t => t.category === cat)) {
+      console.log(`    ${t.value.padEnd(18)} ${t.description}`);
+    }
   }
   console.log('\nUsage: vibe init --template <name>');
   console.log('       vibe init --template          (interactive picker)\n');
 }
 
 function applyTemplate(templateName, targetDir) {
-  const templateDir = getTemplateDir(templateName);
-  if (!fs.existsSync(templateDir)) {
+  const templatePath = getTemplatePath(templateName);
+  if (!templatePath || !fs.existsSync(templatePath)) {
     console.error(`❌ Template "${templateName}" not found.`);
     process.exit(1);
   }
 
-  const claudeMdSrc = path.join(templateDir, 'claude.md');
-  if (fs.existsSync(claudeMdSrc)) {
-    const destDir = path.join(targetDir, '.claude');
-    if (!fs.existsSync(destDir)) {
-      fs.mkdirSync(destDir, { recursive: true });
-    }
-    const destPath = path.join(targetDir, 'CLAUDE.md');
-    if (fs.existsSync(destPath)) {
-      console.log(`⚠️  CLAUDE.md already exists — skipping (template: ${templateName})`);
+  const templateContent = fs.readFileSync(templatePath, 'utf-8');
+  const destPath = path.join(targetDir, 'CLAUDE.md');
+
+  if (fs.existsSync(destPath)) {
+    const existing = fs.readFileSync(destPath, 'utf-8');
+    const separator = `\n\n<!-- vibekit:template:${templateName} -->\n`;
+    if (existing.includes(`vibekit:template:${templateName}`)) {
+      console.log(`⚠️  Template "${templateName}" already injected in CLAUDE.md — skipping`);
     } else {
-      fs.copyFileSync(claudeMdSrc, destPath);
-      console.log(`✅ CLAUDE.md created from "${templateName}" template`);
+      fs.writeFileSync(destPath, existing.trimEnd() + separator + templateContent);
+      console.log(`✅ Template "${templateName}" injected into existing CLAUDE.md`);
     }
-  }
-
-  const agentsSrc = path.join(templateDir, 'agents');
-  if (fs.existsSync(agentsSrc)) {
-    const agentsDest = path.join(targetDir, '.claude', 'agents');
-    if (!fs.existsSync(agentsDest)) {
-      fs.mkdirSync(agentsDest, { recursive: true });
-    }
-    for (const file of fs.readdirSync(agentsSrc)) {
-      fs.copyFileSync(path.join(agentsSrc, file), path.join(agentsDest, file));
-    }
-    console.log(`✅ Agent definitions copied from "${templateName}" template`);
-  }
-
-  const settingsSrc = path.join(templateDir, 'settings.json');
-  if (fs.existsSync(settingsSrc)) {
-    const settingsDest = path.join(targetDir, '.claude', 'settings.json');
-    if (!fs.existsSync(settingsDest)) {
-      const claudeDir = path.join(targetDir, '.claude');
-      if (!fs.existsSync(claudeDir)) {
-        fs.mkdirSync(claudeDir, { recursive: true });
-      }
-      fs.copyFileSync(settingsSrc, settingsDest);
-      console.log(`✅ .claude/settings.json created from "${templateName}" template`);
-    }
+  } else {
+    fs.writeFileSync(destPath, templateContent);
+    console.log(`✅ CLAUDE.md created from "${templateName}" template`);
   }
 }
 
@@ -104,7 +87,7 @@ async function initCommand(args) {
     } else {
       try {
         const choices = TEMPLATES.map(t => ({
-          name: `${t.value} — ${t.description}`,
+          name: `${t.category}/${t.value} — ${t.description}`,
           value: t.value
         }));
         templateName = await arrowSelect('Select a template:', choices);

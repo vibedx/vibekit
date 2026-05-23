@@ -139,19 +139,44 @@ describe('init command', () => {
     });
 
     it('should validate template structure', () => {
-      // Restore original cwd temporarily to read template
       restoreCwd();
       const originalCwd = process.cwd();
-      
+
       const templateSrc = path.resolve(originalCwd, 'assets', 'default.md');
       const templateContent = fs.readFileSync(templateSrc, 'utf-8');
-      
+
       expect(templateContent).toContain('---');
       expect(templateContent).toContain('id: TKT-{id}');
       expect(templateContent).toContain('title: {title}');
-      
-      // Restore mock
+
+      const standardsSrc = path.resolve(originalCwd, 'assets', 'standards');
+      expect(fs.existsSync(path.join(standardsSrc, 'coding', 'default.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'coding', 'karpathy.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'frameworks', 'react.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'languages', 'node.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'languages', 'python.md'))).toBe(true);
+
       restoreCwd = mockProcessCwd(tempDir);
+    });
+
+    it('should inject template into existing CLAUDE.md', async () => {
+      restoreCwd();
+      const originalCwd = process.cwd();
+      restoreCwd = mockProcessCwd(tempDir);
+
+      fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
+      setupMockAssets(tempDir);
+      fs.writeFileSync(path.join(tempDir, 'CLAUDE.md'), '# My Project\n\nExisting content.');
+
+      const initMod = await import('./index.js');
+      const { applyTemplate: apply } = await import('./index.js').catch(() => null) || {};
+
+      await initCommand(['--template', 'default']);
+
+      const result = fs.readFileSync(path.join(tempDir, 'CLAUDE.md'), 'utf-8');
+      expect(result).toContain('# My Project');
+      expect(result).toContain('Existing content.');
+      expect(result).toContain('vibekit:template:default');
     });
   });
 });
