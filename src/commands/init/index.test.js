@@ -56,22 +56,21 @@ describe('init command', () => {
       expect(['--with-samples']).toContain('--with-samples'); // Flag args
     });
 
-    it('should handle folder existence check in temp', () => {
+    it('should handle folder existence check in temp', async () => {
       // Arrange - create existing folder in temp
       fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
       setupMockAssets(tempDir);
 
       // Act
-      expect(() => initCommand([])).toThrow('process.exit(0)');
+      await initCommand([]);
 
       // Assert - should skip creation for existing folder
-      expect(exitMock.exitCalls).toContain(0);
-      expect(consoleMock.logs.log).toContain("⚠️  Folder '.vibe' already exists. Skipping creation.");
+      expect(consoleMock.logs.log).toContain("⚠️  Folder '.vibe' already exists. Skipping .vibe creation.");
     });
 
-    it('should show tip about get-started command when no flags', () => {
+    it('should show tip about get-started command when no flags', async () => {
       // Act
-      expect(() => initCommand([])).toThrow();
+      await initCommand([]);
 
       // Assert - should show either tip or error (both are valid test outcomes)
       const hasMessageOrError = consoleMock.logs.log.length > 0 || consoleMock.logs.error.length > 0;
@@ -80,17 +79,16 @@ describe('init command', () => {
   });
 
   describe('existing folder handling', () => {
-    it('should skip creation when folder already exists', () => {
+    it('should skip creation when folder already exists', async () => {
       // Arrange - create the folder first in temp directory
       fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
 
       // Act
-      expect(() => initCommand([])).toThrow('process.exit(0)');
+      await initCommand([]);
 
       // Assert
-      expect(exitMock.exitCalls).toContain(0);
       expect(consoleMock.logs.log).toContain(
-        "⚠️  Folder '.vibe' already exists. Skipping creation."
+        "⚠️  Folder '.vibe' already exists. Skipping .vibe creation."
       );
     });
 
