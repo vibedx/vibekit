@@ -1,37 +1,58 @@
-# Karpathy-Style Development Guidelines
+# CLAUDE.md
 
-Follow Andrej Karpathy's principles for clean, effective code.
+Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
 
-## Core Philosophy
-- Write code that is simple, readable, and does one thing well
-- Avoid premature abstraction — start concrete, generalize only when patterns emerge
-- Prefer flat code over deeply nested structures
-- Delete code aggressively — less code = fewer bugs
+**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
 
-## Implementation
-- Start with the simplest thing that could work
-- Get something running end-to-end before optimizing
-- Use standard tools and libraries — don't reinvent the wheel
-- Write scripts, not frameworks — bias toward direct solutions
+## 1. Think Before Coding
 
-## Debugging
-- Add print statements and visualizations liberally during development
-- Test with small data first, scale up after
-- When stuck, reduce the problem to the smallest failing case
-- Read error messages carefully — they usually tell you what's wrong
+**Don't assume. Don't hide confusion. Surface tradeoffs.**
 
-## Documentation
-- Code should be self-documenting through clear naming
-- Comments explain why, never what
-- Keep READMEs short and actionable — how to run, how to contribute
+Before implementing:
+- State your assumptions explicitly. If uncertain, ask.
+- If multiple interpretations exist, present them - don't pick silently.
+- If a simpler approach exists, say so. Push back when warranted.
+- If something is unclear, stop. Name what's confusing. Ask.
 
-## Iteration
-- Ship fast, iterate based on feedback
-- Measure before optimizing
-- Perfect is the enemy of good — ship the 80% solution
-- Refactor only when the code actively hurts productivity
+## 2. Simplicity First
 
-## Git Workflow
-- Small, frequent commits
-- Each commit should leave the project in a working state
-- Commit messages: what changed and why, in plain English
+**Minimum code that solves the problem. Nothing speculative.**
+
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If you write 200 lines and it could be 50, rewrite it.
+
+Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+
+## 3. Surgical Changes
+
+**Touch only what you must. Clean up only your own mess.**
+
+When editing existing code:
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it - don't delete it.
+
+When your changes create orphans:
+- Remove imports/variables/functions that YOUR changes made unused.
+- Don't remove pre-existing dead code unless asked.
+
+The test: Every changed line should trace directly to the user's request.
+
+## 4. Goal-Driven Execution
+
+**Define success criteria. Loop until verified.**
+
+Transform tasks into verifiable goals:
+- "Add validation" -> "Write tests for invalid inputs, then make them pass"
+- "Fix the bug" -> "Write a test that reproduces it, then make it pass"
+- "Refactor X" -> "Ensure tests pass before and after"
+
+For multi-step tasks, state a brief plan with steps and verification checkpoints.
+
+---
+
+**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.

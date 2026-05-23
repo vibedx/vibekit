@@ -54,7 +54,7 @@ Currently vibekit requires `npm install -g @vibedx/vibekit` and manual CLI usage
   "version": "0.1.0",
   "description": "Structured ticket workflows, agent orchestration, and worktree isolation for AI-assisted development",
   "author": "vibedx",
-  "repository": "https://github.com/vibedx/vibekit-plugin",
+  "repository": "https://github.com/vibedx/vibekit",
   "keywords": ["tickets", "workflow", "agents", "worktrees"]
 }
 ```
@@ -63,14 +63,23 @@ Currently vibekit requires `npm install -g @vibedx/vibekit` and manual CLI usage
 
 **Phase 1:** Publish to `anthropics/claude-plugins-community` (community marketplace)
 - Submit PR to community marketplace repo
-- Plugin hosted in separate repo: `vibedx/vibekit-plugin`
+- Plugin lives in vibekit repo (no separate repo needed)
+- Install: `/plugin install vibekit` (simplest — no marketplace qualifier needed)
 
-**Phase 2:** Custom marketplace at `vibedx/claude-plugins`
-- Host our own marketplace for vibekit ecosystem plugins
-- `vibe plugin add <url>` could wire into `/plugin marketplace add`
+**Phase 2:** Custom marketplace at `vibedx/plugins`
+- Host our own marketplace for the vibedx ecosystem
+- `/plugin marketplace add https://github.com/vibedx/plugins`
+- Install: `/plugin install vibekit@vibedx-plugins`
 
 **Phase 3:** Apply for `claude-plugins-official` (official marketplace)
 - Once plugin is mature and has adoption
+
+### Plugin Install Naming
+
+The Claude Code syntax is `/plugin install <name>@<marketplace>`. Best options:
+- *Community marketplace (Phase 1):* `/plugin install vibekit` — cleanest, no qualifier
+- *Own marketplace (Phase 2):* `/plugin install vibekit@vibedx-plugins` — if we name the marketplace repo `vibedx/plugins`
+- The original `vibekit@vibedx-vibekit` was redundant. `vibedx@vibekit` would mean plugin "vibedx" from marketplace "vibekit" — backwards. Best path: community marketplace first for the clean `/plugin install vibekit` syntax.
 
 ## Acceptance Criteria
 
@@ -85,7 +94,7 @@ Currently vibekit requires `npm install -g @vibedx/vibekit` and manual CLI usage
 
 ## Code Quality
 
-- [ ] Plugin is in a separate repo (`vibedx/vibekit-plugin`) or a `plugin/` directory in this repo
+- [ ] Plugin lives in the vibekit repo (`.claude-plugin/` at root or `plugin/` directory)
 - [ ] Skills and agents are well-documented with clear trigger conditions
 - [ ] Hook scripts are minimal and fast (don't slow down Claude Code startup)
 - [ ] Tests for hook logic and skill content validation
@@ -115,7 +124,7 @@ vibekit-plugin/
 
 ### Key decisions to make
 
-1. **Separate repo vs. monorepo** — separate repo (`vibekit-plugin`) keeps plugin independent of npm package versioning. Monorepo (`plugin/` dir) keeps everything together. Recommend separate repo for cleaner marketplace submission.
+1. **Separate repo vs. monorepo** — Decision: keep in vibekit repo. Plugin is a packaging layer over existing functionality, not a separate product. Simplifies maintenance and version sync. Community marketplace submission works from any repo structure.
 
 2. **Plugin vs. npm package overlap** — the plugin provides the Claude Code integration layer; the npm package provides the CLI. They complement each other. Users who want CLI use npm; users who want native Claude Code integration use the plugin; power users install both.
 

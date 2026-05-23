@@ -14,11 +14,21 @@ updated_at: "2026-05-23T10:31:41.254Z"
 
 Add a `vibe swarm` command that spins up multiple Claude Code agents in parallel, each working on a separate ticket from the backlog. Each agent gets its own git worktree for isolation and a structured ticket as its prompt context. This builds on existing primitives (`--agent`, `--worktree`, ticket parsing) and is the natural evolution of `vibe start TKT-001 TKT-002 -w --agent`.
 
-Also extend `vibe init` with `--template <name>` support and an interactive picker for setting up CLAUDE.md, skills (from skills.sh), and project conventions from curated templates. This is Option A from the brainstorm — extending init rather than creating separate commands.
+Also extend `vibe init` with `--template <name>` support and an interactive picker for setting up CLAUDE.md, skills, and project conventions from curated templates.
+
+### Ticket Status: `ready` (Option A)
+
+Add a `ready` status between `open` and `in_progress`. Tickets start as `open` (draft/backlog). Author moves to `ready` when acceptance criteria are solid and the ticket is fully fleshed out. Swarm only picks up `ready` tickets — this prevents agents from grabbing half-written or poorly-specified tickets.
+
+Status flow: `open` → `ready` → `in_progress` → `review` → `done`
+
+- `vibe ready TKT-XXX` — mark a ticket as ready for agent pickup
+- `vibe swarm` filters on `status:ready` by default
+- Agents must NOT work on `open` tickets — those are drafts
 
 ### Swarm Core
 
-- `vibe swarm` — grab all `status:open` tickets and assign to agents
+- `vibe swarm` — grab all `status:ready` tickets and assign to agents
 - `vibe swarm --count 3` — limit to N agents
 - `vibe swarm --filter "priority:high"` — filter tickets before assignment
 - `vibe swarm --dry-run` — show what would run without executing
@@ -28,13 +38,16 @@ Also extend `vibe init` with `--template <name>` support and an interactive pick
 
 - `vibe init --template <name>` — initialize with a curated template
 - `vibe init --template` (no name) — interactive picker
-- Built-in templates: `default`, `react`, `node`, `python`, `karpathy`, `principal-engineer`
+- Built-in templates: `default`, `react`, `node`, `python`, `karpathy` (official from multica-ai/andrej-karpathy-skills), `principal-engineer`
+- Templates stored in `assets/templates/<name>/` with exact upstream content where applicable
 - Templates bundle: CLAUDE.md conventions, `.claude/agents/` definitions, skills recommendations, `.claude/settings.json` presets
 - `vibe templates list` — browse available templates
 
 ## Acceptance Criteria
 
-- [ ] `vibe swarm` command exists and spawns agents for open tickets
+- [ ] `ready` status added to ticket lifecycle (`open` → `ready` → `in_progress` → `review` → `done`)
+- [ ] `vibe ready TKT-XXX` command marks tickets as ready for pickup
+- [ ] `vibe swarm` command exists and spawns agents for `ready` tickets
 - [ ] Each agent runs in its own worktree (reuses existing `createWorktree()`)
 - [ ] Swarm state tracked in `.vibe/.state/swarm.json` with PIDs, ticket IDs, statuses
 - [ ] `vibe swarm status` shows live agent progress table
@@ -60,7 +73,7 @@ Also extend `vibe init` with `--template <name>` support and an interactive pick
 ### Swarm Architecture — 3 new pieces
 
 **1. Orchestrator (`src/commands/swarm/index.js`)**
-- Loads tickets via `loadTicketsByStatus('open')`, applies filters, respects `--count` cap
+- Loads tickets via `loadTicketsByStatus('ready')`, applies filters, respects `--count` cap
 - Creates one worktree per ticket (reuses `createWorktree()` from `src/utils/git.js`)
 - Spawns one Claude agent per worktree (extract spawn logic from `start/index.js`)
 - Writes swarm state to `.vibe/.state/swarm.json`
@@ -80,7 +93,7 @@ Current agents are fire-and-forget (`spawn()` + `detach` + `unref`). For swarm a
 
 ### Template System
 
-- Templates stored in `assets/templates/<name>/` — each contains `claude.md`, optional `agents/`, optional `settings.json`
+- Templates stored in `assets/templates/<name>/` — each contains `claude.md` (exact upstream content where applicable, e.g. karpathy from multica-ai/andrej-karpathy-skills), optional `agents/`, optional `settings.json`
 - `vibe init --template react` copies the react template's CLAUDE.md + agents into the project
 - Interactive picker uses existing `arrow-select.js` utility
 - Template registry can be extended via `vibe templates add <git-url>` (future)
