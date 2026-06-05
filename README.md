@@ -126,6 +126,40 @@ vibe start TKT-001 --agent                  # Single ticket, current directory
 vibe start TKT-001 TKT-002 -w --agent       # Multiple tickets in worktrees with agents
 ```
 
+### 📋 Plans → Tickets
+```bash
+# Save a Claude implementation plan to .vibe/plans/, then break it into tickets.
+# Preview the extracted tickets (nothing is written by default)
+vibe plan to-ticket .vibe/plans/my-feature.md
+
+# Create the tickets once the breakdown looks right
+vibe plan to-ticket .vibe/plans/my-feature.md --auto
+
+# Show the extracted items without creating anything
+vibe plan to-ticket .vibe/plans/my-feature.md --dry-run
+```
+
+### 🔀 Pull Requests
+```bash
+# Open a GitHub PR from the current ticket branch (title/body from the ticket)
+vibe pr
+
+# Open PRs for specific tickets
+vibe pr TKT-003 TKT-004
+
+# Open PRs for all worktree branches
+vibe pr --all
+
+# Open as a draft
+vibe pr --draft
+```
+
+### 🐝 Swarm (Parallel Agents)
+```bash
+# Spawn parallel Claude agents across multiple tickets in isolated worktrees
+vibe swarm TKT-001 TKT-002 TKT-003
+```
+
 ### 👥 Team Management
 ```bash
 # List team members
