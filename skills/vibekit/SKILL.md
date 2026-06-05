@@ -70,6 +70,7 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe lint --fix` | Auto-fix missing sections |
 | `vibe refine <id>` | AI-enhance ticket details |
 | `vibe plan to-ticket <file>` | Convert a saved plan into tickets (AI) |
+| `vibe swarm` | Spawn parallel agents across open tickets in worktrees |
 | `vibe team` | Manage team members |
 
 ## Creating Tickets (for AI agents)
@@ -254,6 +255,36 @@ The command sends the plan to Claude, which extracts discrete work items
 ticket per item to `.vibe/tickets/`. Default is preview-then-confirm: it shows
 the breakdown and only writes files when you pass `--auto`. Chain it with
 `vibe start TKT-XXX` to begin work.
+
+### Swarming (Parallel Agents)
+
+`vibe swarm` spins up multiple Claude agents at once, each in its own worktree,
+to burn down a batch of tickets in parallel:
+
+```bash
+# Swarm all open tickets (capped by config swarm.maxAgents, default 3)
+vibe swarm
+
+# Limit the number of concurrent agents
+vibe swarm --count 5
+
+# Only swarm tickets matching a filter (frontmatter key:value)
+vibe swarm --filter priority:high
+
+# Use a specific base branch for the worktrees
+vibe swarm --base main
+
+# Check on a running swarm
+vibe swarm status
+```
+
+Configure caps and timeout in `.vibe/config.yml`:
+
+```yaml
+swarm:
+  maxAgents: 3
+  timeout: 900  # seconds
+```
 
 ### Monitoring Progress
 

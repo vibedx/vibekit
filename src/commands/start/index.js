@@ -3,7 +3,6 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { execSync, spawn } from 'child_process';
 import { getTicketsDir, getConfig, createSlug } from '../../utils/index.js';
-import { fileURLToPath } from 'url';
 import {
   isGitRepository,
   getCurrentBranch,
@@ -19,16 +18,7 @@ import {
   getRepoRoot,
   getDefaultBaseBranch
 } from '../../utils/git.js';
-
-function loadSkillContext() {
-  try {
-    const __dirname = path.dirname(fileURLToPath(import.meta.url));
-    const skillPath = path.join(__dirname, '..', '..', '..', 'skills', 'vibekit', 'SKILL.md');
-    return fs.readFileSync(skillPath, 'utf-8');
-  } catch {
-    return '';
-  }
-}
+import { loadSkillContext, buildAgentPrompt, spawnAgent } from '../../utils/agent.js';
 
 function parseTicketIds(args) {
   const ids = [];
@@ -280,24 +270,15 @@ function startCommand(args) {
     }
 
     if (spawnAgent) {
-      const agentTimeout = config.worktree?.agent?.timeout || 900;
+      const agentTimeout = config.worktree?.agent?.timeout || config.agent?.timeout || 900;
       const skillContext = loadSkillContext();
       console.log('\n🤖 Spawning Claude agents...\n');
       for (const info of worktreeInfos) {
-        const ticketContent = fs.readFileSync(info.ticket.filePath, 'utf-8');
-        const prompt = flags.prompt
-          ? flags.prompt
-          : `You are working on ticket ${info.ticket.frontmatter.id}: ${info.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.${skillContext ? `\n\n--- VibeKit Skill Reference ---\n${skillContext}` : ''}`;
+        const prompt = buildAgentPrompt(info.ticket, flags.prompt, skillContext);
 
         try {
-          const agentProcess = spawn('claude', ['-p', prompt, '--timeout', String(agentTimeout * 1000)], {
-            cwd: info.worktreePath,
-            stdio: 'ignore',
-            detached: true
-          });
-
-          agentProcess.unref();
-          console.log(`  🤖 ${info.ticket.frontmatter.id}: Agent spawned in ${info.worktreePath} (timeout: ${agentTimeout}s)`);
+          const pid = spawnAgent(prompt, info.worktreePath, agentTimeout);
+          console.log(`  🤖 ${info.ticket.frontmatter.id}: Agent spawned in ${info.worktreePath} (PID ${pid}, timeout: ${agentTimeout}s)`);
         } catch (error) {
           console.error(`  ❌ ${info.ticket.frontmatter.id}: Failed to spawn agent — ${error.message}`);
         }
@@ -337,23 +318,14 @@ function startCommand(args) {
 
     if (spawnAgent) {
       const ticket = tickets[0];
-      const agentTimeout = config.worktree?.agent?.timeout || 900;
+      const agentTimeout = config.worktree?.agent?.timeout || config.agent?.timeout || 900;
       const skillContext = loadSkillContext();
-      const ticketContent = fs.readFileSync(ticket.filePath, 'utf-8');
-      const prompt = flags.prompt
-        ? flags.prompt
-        : `You are working on ticket ${ticket.frontmatter.id}: ${ticket.frontmatter.title}\n\nHere is the full ticket:\n\n${ticketContent}\n\nImplement the ticket requirements. Follow the acceptance criteria. Commit your work when done. Update the ticket status to done when complete.${skillContext ? `\n\n--- VibeKit Skill Reference ---\n${skillContext}` : ''}`;
+      const prompt = buildAgentPrompt(ticket, flags.prompt, skillContext);
 
       console.log('\n🤖 Spawning Claude agent...\n');
       try {
-        const agentProcess = spawn('claude', ['-p', prompt, '--timeout', String(agentTimeout * 1000)], {
-          cwd: process.cwd(),
-          stdio: 'ignore',
-          detached: true
-        });
-
-        agentProcess.unref();
-        console.log(`  🤖 ${ticket.frontmatter.id}: Agent spawned (timeout: ${agentTimeout}s)`);
+        const pid = spawnAgent(prompt, process.cwd(), agentTimeout);
+        console.log(`  🤖 ${ticket.frontmatter.id}: Agent spawned (PID ${pid}, timeout: ${agentTimeout}s)`);
         console.log('\n🏁 Agent launched!\n');
         console.log('Monitor progress:');
         console.log('  vibe status          # see ticket status');

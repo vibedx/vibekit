@@ -27,6 +27,10 @@ team:
 agent:
   timeout: 900
 
+swarm:
+  maxAgents: 3
+  timeout: 900
+
 ai:
   enabled: false
 

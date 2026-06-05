@@ -56,22 +56,21 @@ describe('init command', () => {
       expect(['--with-samples']).toContain('--with-samples'); // Flag args
     });
 
-    it('should handle folder existence check in temp', () => {
+    it('should handle folder existence check in temp', async () => {
       // Arrange - create existing folder in temp
       fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
       setupMockAssets(tempDir);
 
       // Act
-      expect(() => initCommand([])).toThrow('process.exit(0)');
+      await initCommand([]);
 
       // Assert - should skip creation for existing folder
-      expect(exitMock.exitCalls).toContain(0);
-      expect(consoleMock.logs.log).toContain("⚠️  Folder '.vibe' already exists. Skipping creation.");
+      expect(consoleMock.logs.log).toContain("⚠️  Folder '.vibe' already exists. Skipping .vibe creation.");
     });
 
-    it('should show tip about get-started command when no flags', () => {
+    it('should show tip about get-started command when no flags', async () => {
       // Act
-      expect(() => initCommand([])).toThrow();
+      await initCommand([]);
 
       // Assert - should show either tip or error (both are valid test outcomes)
       const hasMessageOrError = consoleMock.logs.log.length > 0 || consoleMock.logs.error.length > 0;
@@ -80,17 +79,16 @@ describe('init command', () => {
   });
 
   describe('existing folder handling', () => {
-    it('should skip creation when folder already exists', () => {
+    it('should skip creation when folder already exists', async () => {
       // Arrange - create the folder first in temp directory
       fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
 
       // Act
-      expect(() => initCommand([])).toThrow('process.exit(0)');
+      await initCommand([]);
 
       // Assert
-      expect(exitMock.exitCalls).toContain(0);
       expect(consoleMock.logs.log).toContain(
-        "⚠️  Folder '.vibe' already exists. Skipping creation."
+        "⚠️  Folder '.vibe' already exists. Skipping .vibe creation."
       );
     });
 
@@ -141,19 +139,44 @@ describe('init command', () => {
     });
 
     it('should validate template structure', () => {
-      // Restore original cwd temporarily to read template
       restoreCwd();
       const originalCwd = process.cwd();
-      
+
       const templateSrc = path.resolve(originalCwd, 'assets', 'default.md');
       const templateContent = fs.readFileSync(templateSrc, 'utf-8');
-      
+
       expect(templateContent).toContain('---');
       expect(templateContent).toContain('id: TKT-{id}');
       expect(templateContent).toContain('title: {title}');
-      
-      // Restore mock
+
+      const standardsSrc = path.resolve(originalCwd, 'assets', 'standards');
+      expect(fs.existsSync(path.join(standardsSrc, 'coding', 'default.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'coding', 'karpathy.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'frameworks', 'react.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'languages', 'node.md'))).toBe(true);
+      expect(fs.existsSync(path.join(standardsSrc, 'languages', 'python.md'))).toBe(true);
+
       restoreCwd = mockProcessCwd(tempDir);
+    });
+
+    it('should inject template into existing CLAUDE.md', async () => {
+      restoreCwd();
+      const originalCwd = process.cwd();
+      restoreCwd = mockProcessCwd(tempDir);
+
+      fs.mkdirSync(path.join(tempDir, '.vibe'), { recursive: true });
+      setupMockAssets(tempDir);
+      fs.writeFileSync(path.join(tempDir, 'CLAUDE.md'), '# My Project\n\nExisting content.');
+
+      const initMod = await import('./index.js');
+      const { applyTemplate: apply } = await import('./index.js').catch(() => null) || {};
+
+      await initCommand(['--template', 'default']);
+
+      const result = fs.readFileSync(path.join(tempDir, 'CLAUDE.md'), 'utf-8');
+      expect(result).toContain('# My Project');
+      expect(result).toContain('Existing content.');
+      expect(result).toContain('vibekit:template:default');
     });
   });
 });
