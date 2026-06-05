@@ -27,6 +27,7 @@ function initCommand(args) {
 
   fs.mkdirSync(targetFolder, { recursive: true });
   fs.mkdirSync(path.join(targetFolder, "tickets"), { recursive: true });
+  fs.mkdirSync(path.join(targetFolder, "plans"), { recursive: true });
   fs.mkdirSync(path.join(targetFolder, ".templates"), { recursive: true });
 
   // Copy files from assets directory instead of using hardcoded templates
@@ -34,7 +35,7 @@ function initCommand(args) {
   fs.copyFileSync(templateSrc, path.join(targetFolder, ".templates", "default.md"));
   fs.copyFileSync(teamSrc, path.join(targetFolder, "team.yml"));
 
-  console.log(`✅ '${targetFolder}' initialized with config, tickets/, and .templates/default.md`);
+  console.log(`✅ '${targetFolder}' initialized with config, tickets/, plans/, and .templates/default.md`);
   
   // Ask if the user wants to run get-started
   console.log("\nWould you like to create sample tickets and documentation? (y/n)");
