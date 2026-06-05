@@ -14,6 +14,7 @@ import {
   branchExistsRemotely,
   getDefaultBaseBranch
 } from '../../utils/git.js';
+import toTicketCommand from './to-ticket.js';
 
 function parseTicketIds(args) {
   const ids = [];
@@ -106,6 +107,11 @@ function updateTicketStatus(ticket, worktreePath) {
 }
 
 async function planCommand(args) {
+  // Handle subcommands
+  if (args.length > 0 && args[0] === 'to-ticket') {
+    return toTicketCommand(args.slice(1));
+  }
+
   if (!isGitRepository()) {
     console.error('❌ Not in a git repository.');
     process.exit(1);
@@ -114,16 +120,20 @@ async function planCommand(args) {
   const { ids, flags } = parseTicketIds(args);
 
   if (ids.length === 0 && !flags.statusFilter) {
-    console.error('❌ Usage: vibe plan <TKT-001> <TKT-002> ... [--status=open] [--base main] [--dry-run] [--prompt "..."]');
+    console.error('❌ Usage:');
+    console.error('  vibe plan <TKT-001> <TKT-002> ...  Spawn parallel agents for tickets');
+    console.error('  vibe plan to-ticket <file> [--auto] [--dry-run]  Convert plan to tickets');
     console.error('');
-    console.error('Spawn parallel Claude agents in worktrees for multiple tickets.');
-    console.error('');
-    console.error('Options:');
+    console.error('Options for parallel agents:');
     console.error('  --status=<status>  Start all tickets with this status (e.g. --status=open)');
     console.error('  --base <branch>    Base branch for worktrees (default: main)');
     console.error('  --dry-run          Show what would happen without doing it');
     console.error('  --no-install       Skip npm install in worktrees');
     console.error('  --prompt "..."     Custom prompt to pass to each Claude agent');
+    console.error('');
+    console.error('Options for plan to-ticket:');
+    console.error('  --auto             Automatically create tickets (shows preview by default)');
+    console.error('  --dry-run          Show extracted tickets without creating them');
     process.exit(1);
   }
 

@@ -69,6 +69,7 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe lint` | Validate ticket format |
 | `vibe lint --fix` | Auto-fix missing sections |
 | `vibe refine <id>` | AI-enhance ticket details |
+| `vibe plan to-ticket <file>` | Convert a saved plan into tickets (AI) |
 | `vibe team` | Manage team members |
 
 ## Creating Tickets (for AI agents)
@@ -231,6 +232,28 @@ vibe pr --draft
 ```
 
 PR title and body are auto-populated from ticket content. Ticket status is set to `review`.
+
+### Plans → Tickets
+
+When you (Claude) produce an implementation plan, save it to `.vibe/plans/` as a
+markdown file, then turn it into tickets:
+
+```bash
+# Preview the tickets vibekit would extract from a plan (no files written)
+vibe plan to-ticket .vibe/plans/my-feature.md
+
+# Create the tickets once the breakdown looks right
+vibe plan to-ticket .vibe/plans/my-feature.md --auto
+
+# Dry-run shows the extracted items without creating anything
+vibe plan to-ticket .vibe/plans/my-feature.md --dry-run
+```
+
+The command sends the plan to Claude, which extracts discrete work items
+(title, description, acceptance criteria, priority, estimate) and writes one
+ticket per item to `.vibe/tickets/`. Default is preview-then-confirm: it shows
+the breakdown and only writes files when you pass `--auto`. Chain it with
+`vibe start TKT-XXX` to begin work.
 
 ### Monitoring Progress
 

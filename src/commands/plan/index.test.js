@@ -9,10 +9,12 @@ jest.unstable_mockModule('child_process', () => ({
   spawn: jest.fn(() => ({ unref: jest.fn(), pid: 12345 }))
 }));
 
+let ticketIdCounter = 1;
 jest.unstable_mockModule('../../utils/index.js', () => ({
   getTicketsDir: jest.fn(),
   getConfig: jest.fn(() => ({ git: { branch_prefix: 'feature/' } })),
-  createSlug: jest.fn(title => title.toLowerCase().replace(/\s+/g, '-'))
+  createSlug: jest.fn(title => title.toLowerCase().replace(/\s+/g, '-')),
+  getNextTicketId: jest.fn(() => `TKT-${String(ticketIdCounter++).padStart(3, '0')}`)
 }));
 
 jest.unstable_mockModule('../../utils/git.js', () => ({
