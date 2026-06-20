@@ -1,0 +1,20 @@
+{
+  "name": "vibekit",
+  "displayName": "VibeKit — Ticket-Driven Development",
+  "version": "0.1.0",
+  "description": "Structured ticket workflows, agent orchestration, and worktree isolation for AI-assisted development",
+  "author": "vibedx",
+  "repository": "https://github.com/vibedx/vibekit",
+  "homepage": "https://github.com/vibedx/vibekit",
+  "keywords": ["tickets", "workflow", "agents", "worktrees"],
+  "skills": [
+    "skills/vibekit-workflow",
+    "skills/ticket-writer"
+  ],
+  "agents": [
+    "agents/ticket-worker.md",
+    "agents/reviewer.md"
+  ],
+  "hooks": "hooks/hooks.json",
+  "settings": "settings.json"
+}
