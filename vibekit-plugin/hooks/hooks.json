@@ -1,0 +1,17 @@
+{
+  "hooks": [
+    {
+      "event": "SessionStart",
+      "description": "Detect .vibe/ directory and load ticket context",
+      "command": "bash hooks/detect-vibe.sh"
+    },
+    {
+      "event": "PostToolUse",
+      "matcher": {
+        "tool": "Bash",
+        "pattern": "git commit"
+      },
+      "description": "Remind agent to update ticket status after commits"
+    }
+  ]
+}
