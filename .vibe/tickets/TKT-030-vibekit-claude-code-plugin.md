@@ -2,7 +2,7 @@
 id: TKT-030
 title: vibekit Claude Code plugin for marketplace distribution
 slug: TKT-030-vibekit-claude-code-plugin
-status: open
+status: done
 priority: medium
 assignee: ""
 author: maniyadv
