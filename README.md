@@ -54,6 +54,22 @@ The skill teaches agents the ticket-driven workflow — they'll create focused t
 
 **Coordinating multiple agents?** See **[docs/agent-workflow.md](./docs/agent-workflow.md)** for a framework-agnostic pattern for running multi-agent teams on a shared repo — assignees, polling loops, escalation, and loop prevention.
 
+### 🧩 Claude Code Plugin
+
+Prefer Claude Code? Install the vibekit plugin to get the full ticket-driven workflow, agents, and hooks built in:
+
+```
+/plugin install vibekit
+```
+
+The plugin bundles:
+
+- **Skills** — `vibekit-workflow` (full create → start → implement → close flow) and `ticket-writer` (well-structured tickets with acceptance criteria)
+- **Agents** — `ticket-worker` (reads a ticket, implements it, closes it) and `reviewer` (checks completed work against acceptance criteria)
+- **Hooks** — `SessionStart` detects your `.vibe/` directory and surfaces open ticket counts
+
+See **[vibekit-plugin/](./vibekit-plugin/)** for details. The CLI is optional but recommended (`npm install -g @vibedx/vibekit`).
+
 ## 🤔 Why VibeKit?
 
 - **🎯 Vibe code with manageable smaller tasks** - Break down complex features into focused tickets
