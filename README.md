@@ -155,6 +155,27 @@ vibe plan to-ticket .vibe/plans/my-feature.md --auto
 vibe plan to-ticket .vibe/plans/my-feature.md --dry-run
 ```
 
+### 📚 Docs
+```bash
+# Create a doc from a template (types: guide, design-doc, code-doc, faq)
+vibe docs add "Getting Started"
+vibe docs add "Docs Architecture" --type design-doc
+
+# Also open it in $EDITOR after creating
+vibe docs add "API Reference" --type code-doc --edit
+
+# List docs, with optional filters
+vibe docs list
+vibe docs list --type design-doc --status draft --tag api
+
+# Print a doc to stdout
+vibe docs show DOC-001
+
+# AI refinement pass — expands sections and fills placeholders
+vibe docs refine DOC-001
+```
+Docs live in `.vibe/docs/` with their own `DOC-NNN` sequence (independent from tickets). Templates are scaffolded into `.vibe/.templates/docs/` on `vibe init`.
+
 ### 🔀 Pull Requests
 ```bash
 # Open a GitHub PR from the current ticket branch (title/body from the ticket)

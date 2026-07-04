@@ -106,13 +106,25 @@ async function initCommand(args) {
     fs.mkdirSync(targetFolder, { recursive: true });
     fs.mkdirSync(path.join(targetFolder, 'tickets'), { recursive: true });
     fs.mkdirSync(path.join(targetFolder, 'plans'), { recursive: true });
+    fs.mkdirSync(path.join(targetFolder, 'docs'), { recursive: true });
     fs.mkdirSync(path.join(targetFolder, '.templates'), { recursive: true });
+    fs.mkdirSync(path.join(targetFolder, '.templates', 'docs'), { recursive: true });
 
     fs.copyFileSync(configSrc, path.join(targetFolder, 'config.yml'));
     fs.copyFileSync(templateSrc, path.join(targetFolder, '.templates', 'default.md'));
     fs.copyFileSync(teamSrc, path.join(targetFolder, 'team.yml'));
 
-    console.log(`✅ '${targetFolder}' initialized with config, tickets/, plans/, and .templates/default.md`);
+    const docsTemplatesSrc = path.join(__dirname, '../../../assets', 'docs');
+    if (fs.existsSync(docsTemplatesSrc)) {
+      for (const file of fs.readdirSync(docsTemplatesSrc)) {
+        fs.copyFileSync(
+          path.join(docsTemplatesSrc, file),
+          path.join(targetFolder, '.templates', 'docs', file)
+        );
+      }
+    }
+
+    console.log(`✅ '${targetFolder}' initialized with config, tickets/, plans/, docs/, and .templates/`);
   } else {
     console.log(`⚠️  Folder '${targetFolder}' already exists. Skipping .vibe creation.`);
   }
