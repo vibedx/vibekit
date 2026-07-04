@@ -21,6 +21,16 @@ tickets:
     - high
     - critical
 
+docs:
+  path: ".vibe/docs"
+  id_format: "DOC-{number}"
+  default_template: ".vibe/.templates/docs/default.md"
+  default_type: guide
+  status_options:
+    - draft
+    - review
+    - published
+
 team:
   path: .vibe/team.yml
 

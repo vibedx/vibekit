@@ -24,7 +24,7 @@ const __dirname = dirname(__filename);
 const AVAILABLE_COMMANDS = [
   'init', 'new', 'close', 'list', 'get-started',
   'start', 'link', 'unlink', 'refine', 'lint', 'review', 'team', 'skills',
-  'status', 'stats', 'plan', 'pr', 'swarm'
+  'status', 'stats', 'plan', 'pr', 'swarm', 'docs'
 ];
 
 /**
