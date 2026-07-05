@@ -2,7 +2,7 @@
 id: TKT-028
 title: fix get-started duplicate ticket IDs The get-started command creates all sample tickets with TKT-001 because the regex has double-escaped \d. Fix to use the already-imported getNextTicketId() utility.
 slug: TKT-028-fix-get-started-duplicate
-status: in_progress
+status: done
 priority: medium
 assignee: ""
 author: ""
