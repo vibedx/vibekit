@@ -41,12 +41,12 @@ function createSampleTicket(title, description, priority = "medium", status = "o
   content = content.replace(/^status: .*$/m, `status: ${status}`);
   
   // Add description
-  content = content.replace(/## Description\\s*\\n\\s*\\n/m, `## Description\\n\\n${description}\\n\\n`);
-  
+  content = content.replace(/## Description\s*\n\s*\n/m, `## Description\n\n${description}\n\n`);
+
   // Add AI prompt for the feature request example
   if (title.includes("AI Prompt")) {
-    content = content.replace(/## AI Prompt\\s*\\n\\s*\\n/m, 
-      `## AI Prompt\\n\\nGenerate ideas for implementing this feature in a Node.js CLI application. Consider user experience, error handling, and performance.\\n\\n`);
+    content = content.replace(/## AI Prompt\s*\n\s*\n/m,
+      `## AI Prompt\n\nGenerate ideas for implementing this feature in a Node.js CLI application. Consider user experience, error handling, and performance.\n\n`);
   }
   
   const outputPath = path.join(ticketDir, filename);
