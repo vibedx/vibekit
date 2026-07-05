@@ -122,6 +122,10 @@ describe('get-started command', () => {
       expect(content).toContain('status: open');
       expect(content).toContain('## Description');
       expect(content).toContain('Simple Task Example');
+      // The description text must be injected under the Description heading (regression: TKT-028)
+      expect(content).toContain('This is a simple task ticket example showing the basic structure.');
+      // Injected content must be real newlines, never literal backslash sequences
+      expect(content).not.toMatch(/\\n|\\s/);
       
       // Find the bug report example
       const bugReportFile = files.find(f => f.includes('bug-report-example'));
@@ -222,8 +226,12 @@ describe('get-started command', () => {
       
       const content = fs.readFileSync(path.join(ticketsDir, aiPromptFile), 'utf-8');
       expect(content).toContain('## AI Prompt');
-      expect(content).toContain('## AI Prompt');
       expect(content).toContain('Feature Request with AI Prompt');
+      // The AI prompt body must be injected under the heading (regression: TKT-028)
+      expect(content).toContain('Generate ideas for implementing this feature in a Node.js CLI application.');
+      // And the description for this ticket too
+      expect(content).toContain('This example shows how to use the AI prompt section');
+      expect(content).not.toMatch(/\\n|\\s/);
     });
 
     it('should create tickets with proper slug formatting', () => {
