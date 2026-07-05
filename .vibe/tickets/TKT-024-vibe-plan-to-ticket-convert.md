@@ -1,8 +1,8 @@
 ---
 id: TKT-024
-title: vibe plan to-ticket: convert plans into tickets via Claude
+title: "vibe plan to-ticket: convert plans into tickets via Claude"
 slug: TKT-024-vibe-plan-to-ticket-convert
-status: open
+status: done
 priority: medium
 assignee: ""
 author: ""

@@ -2,7 +2,7 @@
 id: TKT-025
 title: Implement vibe plan to-ticket for Claude integration Added vibe plan to-ticket subcommand to convert saved plans into tickets. Invokes Claude to parse plans and generate discrete work items. Includes preview-then-confirm workflow and full test suite. 3
 slug: TKT-025-implement-vibe-plan-to-ticket
-status: open
+status: done
 priority: high
 assignee: ""
 author: ""
