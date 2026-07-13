@@ -22,6 +22,23 @@ Then read the ticket, plan the work, and `vibe start TKT-XXX` before touching an
 
 **Only skip the ticket for truly trivial changes**: typo fixes, single-line config tweaks, or answering a quick question.
 
+## 🔴 MANDATORY RULE: Detail the Ticket Before Writing Code
+
+**Before writing ANY code on a ticket, the ticket must be documented.** Tickets are often created with empty sections (just HTML comment placeholders). Do not start implementing against an empty ticket.
+
+When you `vibe start` a ticket:
+
+1. Read the ticket file.
+2. Check whether **Description**, **Acceptance Criteria**, and **Implementation Notes** have real content (a section that contains only whitespace or `<!-- ... -->` comments counts as empty).
+3. If any are empty, fill them in based on:
+   - The ticket title
+   - Your understanding of the codebase
+   - The context from the conversation
+4. Commit the updated ticket file with message `docs: add details to TKT-XXX`.
+5. Only then proceed to implementation.
+
+This applies to every AI tool using vibekit, not just Claude. `vibe start` warns when key sections are empty; `vibe start --agent` prepends this instruction to the agent's prompt automatically. Pass `--skip-detail-check` only for intentionally minimal tickets.
+
 ## Why This Matters
 
 Tickets break work into scoped, focused chunks that reduce AI drift and create documentation as a side effect. They also give humans a clear trail of what was done and why — critical for collaboration between humans and agents.
@@ -58,6 +75,7 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe init` | Initialize vibekit in a project |
 | `vibe new "title"` | Create a ticket |
 | `vibe list` | List all tickets |
+| `vibe ready <id>` | Mark a ticket ready for agent pickup (swarm) |
 | `vibe start <id>` | Start work (creates git branch) |
 | `vibe start <id> --worktree` | Start work in a separate worktree |
 | `vibe start <id> --agent` | Spawn a Claude agent to work on the ticket |
@@ -70,7 +88,7 @@ vibe init          # Creates .vibe/ directory with config, team, templates
 | `vibe lint --fix` | Auto-fix missing sections |
 | `vibe refine <id>` | AI-enhance ticket details |
 | `vibe plan to-ticket <file>` | Convert a saved plan into tickets (AI) |
-| `vibe swarm` | Spawn parallel agents across open tickets in worktrees |
+| `vibe swarm` | Spawn parallel agents across `ready` tickets in worktrees |
 | `vibe team` | Manage team members |
 
 ## Creating Tickets (for AI agents)

@@ -81,10 +81,14 @@ function loadTickets(ticketsDir) {
 }
 
 function applyFilters(tickets, filterStr) {
-  if (!filterStr) return tickets.filter(t => t.frontmatter.status === 'open');
+  // Swarm only picks up `ready` tickets by default — `open` tickets are drafts.
+  if (!filterStr) return tickets.filter(t => t.frontmatter.status === 'ready');
+
+  const parts = filterStr.split(',').map(s => s.trim()).filter(Boolean);
+  const specifiesStatus = parts.some(p => p.split(':')[0].trim().toLowerCase() === 'status');
 
   return tickets.filter(t => {
-    const parts = filterStr.split(',').map(s => s.trim());
+    if (!specifiesStatus && t.frontmatter.status !== 'ready') return false;
     return parts.every(part => {
       const [key, value] = part.split(':').map(s => s.trim());
       if (!key || !value) return true;
@@ -263,7 +267,8 @@ export default function swarmCommand(args) {
   tickets = tickets.slice(0, maxAgents);
 
   if (tickets.length === 0) {
-    console.log('No tickets match the filter. Nothing to swarm.');
+    console.log('No `ready` tickets to swarm. Mark tickets ready with `vibe ready TKT-XXX`.');
+    console.log('(Swarm only picks up tickets with status: ready. Use --filter "status:open" to override.)');
     return;
   }
 

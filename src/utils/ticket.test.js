@@ -7,7 +7,7 @@ import {
   mockProcessCwd, 
   createMockVibeProject
 } from './test-helpers.js';
-import { resolveTicketId } from './ticket.js';
+import { resolveTicketId, isTicketSectionEmpty, checkEmptySections } from './ticket.js';
 
 describe('ticket utilities', () => {
   let tempDir;
@@ -180,6 +180,60 @@ describe('ticket utilities', () => {
       expect(typeof result.id).toBe('string');
       expect(typeof result.file).toBe('string');
       expect(typeof result.path).toBe('string');
+    });
+  });
+
+  describe('isTicketSectionEmpty', () => {
+    it('treats a missing section as empty', () => {
+      expect(isTicketSectionEmpty('## Other\ncontent', 'Description')).toBe(true);
+    });
+
+    it('treats a comment-only section as empty', () => {
+      const md = '## Description\n\n<!-- write here -->\n\n## Acceptance Criteria\n';
+      expect(isTicketSectionEmpty(md, 'Description')).toBe(true);
+    });
+
+    it('treats a whitespace-only section as empty', () => {
+      expect(isTicketSectionEmpty('## Description\n\n   \n\n## Next\n', 'Description')).toBe(true);
+    });
+
+    it('treats a section with real content as non-empty', () => {
+      const md = '## Description\n\nBuild the login flow.\n\n## Next\n';
+      expect(isTicketSectionEmpty(md, 'Description')).toBe(false);
+    });
+
+    it('treats brief content as non-empty (no false positives)', () => {
+      expect(isTicketSectionEmpty('## Description\nFix typo.\n', 'Description')).toBe(false);
+    });
+
+    it('returns true for invalid input', () => {
+      expect(isTicketSectionEmpty(null, 'Description')).toBe(true);
+      expect(isTicketSectionEmpty('## Description\nx', null)).toBe(true);
+    });
+  });
+
+  describe('checkEmptySections', () => {
+    it('reports only the empty key sections', () => {
+      const md = [
+        '## Description',
+        'A real description here.',
+        '',
+        '## Acceptance Criteria',
+        '<!-- todo -->',
+        '',
+        '## Implementation Notes',
+        ''
+      ].join('\n');
+      expect(checkEmptySections(md)).toEqual(['Acceptance Criteria', 'Implementation Notes']);
+    });
+
+    it('returns empty array when all key sections have content', () => {
+      const md = [
+        '## Description', 'd', '',
+        '## Acceptance Criteria', '- [ ] a', '',
+        '## Implementation Notes', 'notes'
+      ].join('\n');
+      expect(checkEmptySections(md)).toEqual([]);
     });
   });
 

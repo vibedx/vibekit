@@ -19,6 +19,7 @@ import {
   getDefaultBaseBranch
 } from '../../utils/git.js';
 import { loadSkillContext, buildAgentPrompt, spawnAgent } from '../../utils/agent.js';
+import { checkEmptySections, KEY_TICKET_SECTIONS } from '../../utils/ticket.js';
 
 function parseTicketIds(args) {
   const ids = [];
@@ -34,6 +35,9 @@ function parseTicketIds(args) {
       i++;
     } else if (arg === '--no-install') {
       flags.noInstall = true;
+      i++;
+    } else if (arg === '--skip-detail-check') {
+      flags.skipDetailCheck = true;
       i++;
     } else if (arg === '--agent') {
       flags.agent = true;
@@ -123,6 +127,25 @@ function updateTicketStatus(ticket, worktreePath) {
   fs.writeFileSync(ticket.filePath, updatedContent, 'utf-8');
 }
 
+function getEmptySections(ticket) {
+  try {
+    return checkEmptySections(fs.readFileSync(ticket.filePath, 'utf-8'));
+  } catch {
+    return [];
+  }
+}
+
+function buildDetailInstruction(ticketId, emptySections) {
+  return [
+    `⚠️ Ticket ${ticketId} is missing detail in: ${emptySections.join(', ')}.`,
+    'BEFORE writing any code:',
+    `1. Fill in the empty section(s) (${emptySections.join(', ')}) based on the ticket title, the codebase, and this conversation.`,
+    `2. Commit the updated ticket file with message "docs: add details to ${ticketId}".`,
+    '3. Only then start implementation.',
+    ''
+  ].join('\n');
+}
+
 /**
  * Start working on ticket(s) by checking out branches or creating worktrees
  * @param {string[]} args Command arguments
@@ -147,6 +170,7 @@ function startCommand(args) {
     console.error('  --base <branch>    Base branch for new branches/worktrees (default: main)');
     console.error('  --dry-run          Show what would happen without doing it');
     console.error('  --no-install       Skip npm install in worktrees');
+    console.error('  --skip-detail-check  Skip the empty-section detail check');
     process.exit(1);
   }
 
@@ -203,6 +227,14 @@ function startCommand(args) {
   for (const ticket of tickets) {
     const branchName = getBranchName(ticket, config);
     const title = ticket.frontmatter.title || 'Untitled';
+
+    if (!spawnAgent && !flags.skipDetailCheck) {
+      const empty = getEmptySections(ticket);
+      if (empty.length > 0) {
+        console.log(`  ⚠️  ${ticket.frontmatter.id}: empty section(s) — ${empty.join(', ')}`);
+        console.log(`     Fill these in before coding (or run \`vibe refine ${ticket.frontmatter.id}\`). Use --skip-detail-check to bypass.`);
+      }
+    }
 
     if (useWorktree) {
       const worktreePath = getWorktreePath(repoName, branchName);
@@ -274,7 +306,13 @@ function startCommand(args) {
       const skillContext = loadSkillContext();
       console.log('\n🤖 Spawning Claude agents...\n');
       for (const info of worktreeInfos) {
-        const prompt = buildAgentPrompt(info.ticket, flags.prompt, skillContext);
+        let prompt = buildAgentPrompt(info.ticket, flags.prompt, skillContext);
+        if (!flags.prompt && !flags.skipDetailCheck) {
+          const empty = getEmptySections(info.ticket);
+          if (empty.length > 0) {
+            prompt = buildDetailInstruction(info.ticket.frontmatter.id, empty) + '\n' + prompt;
+          }
+        }
 
         try {
           const pid = spawnAgent(prompt, info.worktreePath, agentTimeout);
@@ -320,7 +358,13 @@ function startCommand(args) {
       const ticket = tickets[0];
       const agentTimeout = config.worktree?.agent?.timeout || config.agent?.timeout || 900;
       const skillContext = loadSkillContext();
-      const prompt = buildAgentPrompt(ticket, flags.prompt, skillContext);
+      let prompt = buildAgentPrompt(ticket, flags.prompt, skillContext);
+      if (!flags.prompt && !flags.skipDetailCheck) {
+        const empty = getEmptySections(ticket);
+        if (empty.length > 0) {
+          prompt = buildDetailInstruction(ticket.frontmatter.id, empty) + '\n' + prompt;
+        }
+      }
 
       console.log('\n🤖 Spawning Claude agent...\n');
       try {

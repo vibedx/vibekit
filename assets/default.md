@@ -12,19 +12,19 @@ updated_at: {date}
 
 ## Description
 
-<!-- Write the task details, requirements, and any other relevant information here. -->
+<!-- What is being built and why? Include context on the problem being solved and the desired outcome. Fill this in before writing any code. -->
 
 ## Acceptance Criteria
 
-<!-- List the specific conditions that must be met for this ticket to be considered complete. -->
+<!-- List specific, testable conditions for "done". Use checkboxes: - [ ] criterion. Fill this in before writing any code. -->
 
 ## Code Quality
 
-<!-- List the specific conditions that must be met for this ticket to be considered complete. -->
+<!-- Non-functional requirements: tests, no breaking changes, shared utilities, edge cases handled. -->
 
 ## Implementation Notes
 
-<!-- Technical details, references, or implementation context that might be helpful. -->
+<!-- Key technical decisions, files to modify, dependencies, and edge cases to handle. Fill this in before writing any code. -->
 
 ## Design / UX Considerations
 
