@@ -11,6 +11,7 @@ tickets:
     word_limit: 5
   status_options:
     - open
+    - ready
     - in_progress
     - review
     - done

@@ -12,6 +12,7 @@ tickets:
   use_status_folders: false
   status_options:
     - open
+    - ready
     - in_progress
     - review
     - done

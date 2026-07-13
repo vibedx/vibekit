@@ -409,15 +409,63 @@ function hasSectionContent(lines, sectionHeader) {
   if (!Array.isArray(lines)) {
     return false;
   }
-  
+
   if (typeof sectionHeader !== 'string' || !sectionHeader.trim()) {
     return false;
   }
-  
-  const sectionIndex = lines.findIndex(line => 
+
+  const sectionIndex = lines.findIndex(line =>
     line && typeof line === 'string' && line.trim() === sectionHeader.trim()
   );
-  
+
   return sectionIndex !== -1;
+}
+
+// Sections an agent must fill in before writing code.
+export const KEY_TICKET_SECTIONS = ['Description', 'Acceptance Criteria', 'Implementation Notes'];
+
+/**
+ * Determine whether a ticket section has real content. A section is "empty" if,
+ * after its header, it contains only whitespace, HTML comments, or nothing at
+ * all before the next `##` header or end of file.
+ * @param {string} ticketContent - Full ticket markdown (frontmatter optional)
+ * @param {string} sectionName - Section name without the leading `## `
+ * @returns {boolean} True when the section is missing or has no real content
+ */
+export function isTicketSectionEmpty(ticketContent, sectionName) {
+  if (typeof ticketContent !== 'string' || typeof sectionName !== 'string') {
+    return true;
+  }
+
+  const lines = ticketContent.split('\n');
+  const headerRegex = new RegExp(`^##\\s+${sectionName.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
+
+  let start = lines.findIndex(line => headerRegex.test(line));
+  if (start === -1) {
+    return true;
+  }
+
+  const body = [];
+  for (let i = start + 1; i < lines.length; i++) {
+    if (/^##\s+/.test(lines[i])) break;
+    body.push(lines[i]);
+  }
+
+  const meaningful = body
+    .join('\n')
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .trim();
+
+  return meaningful.length === 0;
+}
+
+/**
+ * Return the list of key sections that are empty in a ticket.
+ * @param {string} ticketContent - Full ticket markdown
+ * @param {string[]} [sections] - Sections to check (defaults to KEY_TICKET_SECTIONS)
+ * @returns {string[]} Names of empty sections
+ */
+export function checkEmptySections(ticketContent, sections = KEY_TICKET_SECTIONS) {
+  return sections.filter(section => isTicketSectionEmpty(ticketContent, section));
 }
 

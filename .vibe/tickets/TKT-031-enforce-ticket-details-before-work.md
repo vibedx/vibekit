@@ -2,9 +2,9 @@
 id: TKT-031
 title: enforce ticket detail authoring before AI begins work
 slug: TKT-031-enforce-ticket-details-before-work
-status: open
+status: done
 priority: high
-assignee: ""
+assignee: ''
 author: maniyadv
 created_at: 2026-05-23T00:00:00.000Z
 updated_at: 2026-05-23T00:00:00.000Z

@@ -2,7 +2,7 @@
 id: TKT-029
 title: vibe swarm — parallel ticket execution with agent teams
 slug: TKT-029-vibe-swarm-parallel-ticket
-status: in_progress
+status: done
 priority: high
 assignee: ""
 author: maniyadv
