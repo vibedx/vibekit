@@ -129,15 +129,25 @@ vibe status
 # Close/complete a ticket
 vibe close TKT-001
 
+# Mark a ticket as `ready` for agent pickup (swarm). Refuses tickets with
+# empty key sections unless --force — keeps drafts out of the swarm queue.
+vibe ready TKT-001
+vibe ready TKT-001 --force
+
 # Start working on a ticket (creates git branch)
 vibe start TKT-001
 vibe start TKT-001 --base main --update-status
+
+# `vibe start` warns when Description / Acceptance Criteria / Implementation
+# Notes are still empty (detail-first authoring gate). Skip the check with:
+vibe start TKT-001 --skip-detail-check
 
 # Start in a separate worktree (parallel work without switching branches)
 vibe start TKT-001 --worktree
 vibe start TKT-001 -w
 
-# Spawn a Claude agent to work on a ticket automatically
+# Spawn a Claude agent to work on a ticket automatically. In --agent mode the
+# agent is told to fill in ticket detail before writing any code.
 vibe start TKT-001 --agent                  # Single ticket, current directory
 vibe start TKT-001 TKT-002 -w --agent       # Multiple tickets in worktrees with agents
 ```
@@ -195,6 +205,10 @@ vibe pr --draft
 ```bash
 # Spawn parallel Claude agents across multiple tickets in isolated worktrees
 vibe swarm TKT-001 TKT-002 TKT-003
+
+# With no ticket args, swarm picks up only `ready` tickets — so agents never
+# grab half-written drafts. Promote tickets with `vibe ready <id>` first.
+vibe swarm
 ```
 
 ### 👥 Team Management
@@ -387,7 +401,7 @@ $ vibe lint
    Error: Missing required section: ## Implementation Notes
 
 ❌ TKT-003-responsive.md
-   Error: Invalid status "in-review". Must be one of: open, in_progress, review, done
+   Error: Invalid status "in-review". Must be one of: open, ready, in_progress, review, done
    Error: Section "## Testing & Test Cases" appears to be empty or too short
 
 ✅ TKT-002-auth.md
@@ -409,7 +423,7 @@ $ vibe lint --fix
    Fixed: 1 missing frontmatter fields and 3 missing sections
 
 ❌ TKT-003-responsive.md
-   Error: Invalid status "in-review". Must be one of: open, in_progress, review, done
+   Error: Invalid status "in-review". Must be one of: open, ready, in_progress, review, done
 
 📊 Summary:
    Files checked: 3
@@ -485,6 +499,7 @@ tickets:
     word_limit: 5
   status_options:
     - open
+    - ready
     - in_progress
     - review
     - done
