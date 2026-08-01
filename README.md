@@ -28,6 +28,8 @@ _vibekit uses vibekit to develop vibekit._ 🔄
 
 ## 🚀 Quick Start
 
+> **Requirements:** Node.js 18+ and `git`.
+
 ```bash
 # Install globally
 npm install -g @vibedx/vibekit
