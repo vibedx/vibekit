@@ -2,12 +2,12 @@
 id: TKT-032
 title: vibe docs command — project documentation system
 slug: TKT-032-vibe-docs-command
-status: in_progress
+status: done
 priority: medium
-assignee: ""
+assignee: ''
 author: maniyadv
-created_at: 2026-07-04
-updated_at: "2026-07-04T13:21:18.442Z"
+created_at: 2026-07-04T00:00:00.000Z
+updated_at: '2026-07-04T13:21:18.442Z'
 ---
 
 ## Description
