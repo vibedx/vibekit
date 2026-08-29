@@ -12,6 +12,7 @@
  * @version 1.0.0
  */
 
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
@@ -19,6 +20,30 @@ import { dirname } from 'path';
 // ESM replacement for __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
+
+/**
+ * Read the CLI version from package.json
+ * @returns {string} The version string, or 'unknown' if it can't be read
+ */
+function getVersion() {
+  try {
+    const pkgPath = path.join(__dirname, 'package.json');
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    return pkg.version || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+/**
+ * Display the help text with available commands
+ */
+function showHelp() {
+  console.log('🎆 VibeKit - Developer-focused ticket management\n');
+  showAvailableCommands();
+  console.log('\nUse "vibe <command>" to get started!');
+  console.log('Run "vibe --version" to see the installed version.');
+}
 
 // Available commands in VibeKit
 const AVAILABLE_COMMANDS = [
@@ -72,19 +97,25 @@ async function executeCommand(command, args) {
 /**
  * Main application entry point
  */
-async function main() {
+export async function main() {
   // Parse command line arguments
   const [command, ...commandArgs] = process.argv.slice(2);
   
   try {
-    // Show help if no command provided
-    if (!command) {
-      console.log('🎆 VibeKit - Developer-focused ticket management\n');
-      showAvailableCommands();
-      console.log('\nUse "vibe <command>" to get started!');
+    // Show help if no command provided or help flag passed
+    if (!command || command === '--help' || command === '-h') {
+      showHelp();
       process.exit(0);
+      return;
     }
-    
+
+    // Print version when requested
+    if (command === '--version' || command === '-v') {
+      console.log(getVersion());
+      process.exit(0);
+      return;
+    }
+
     // Execute the requested command
     await executeCommand(command, commandArgs);
     
@@ -100,8 +131,10 @@ async function main() {
   }
 }
 
-// Run the application
-main().catch((error) => {
-  console.error(`❌ Fatal error: ${error.message}`);
-  process.exit(1);
-});
+// Run the application (skip auto-run under test so it can be imported safely)
+if (process.env.NODE_ENV !== 'test') {
+  main().catch((error) => {
+    console.error(`❌ Fatal error: ${error.message}`);
+    process.exit(1);
+  });
+}
