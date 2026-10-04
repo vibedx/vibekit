@@ -2,7 +2,7 @@
 id: TKT-037
 title: Fix ticket lookup so shorter IDs cannot match a different ticket
 slug: fix-ticket-id-prefix-matching
-status: review
+status: done
 priority: high
 assignee: ""
 author: ""
