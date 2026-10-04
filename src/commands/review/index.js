@@ -4,6 +4,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import chalk from 'chalk';
 import { getTicketsDir, getConfig } from '../../utils/index.js';
+import { normalizeTicketId as normalizeSharedTicketId, markdownFilenameMatchesId } from '../../utils/ticket.js';
 import { isGitRepository, getCurrentBranch } from '../../utils/git.js';
 
 /**
@@ -15,8 +16,8 @@ function extractTicketFromBranch() {
     const branch = getCurrentBranch();
     if (!branch) return null;
     
-    const match = branch.match(/TKT-\d{3}/);
-    return match ? match[0] : null;
+    const match = branch.match(/TKT-\d+/i);
+    return match ? normalizeTicketId(match[0]) : null;
   } catch (error) {
     return null;
   }
@@ -28,76 +29,16 @@ function extractTicketFromBranch() {
  * @returns {string|null} Normalized ticket ID (TKT-XXX format) or null if invalid
  */
 function normalizeTicketId(input) {
-  // Handle null, undefined, or non-string inputs
   if (!input || typeof input !== 'string') {
     return null;
   }
-  
-  // Sanitize input: trim whitespace and convert to uppercase
-  const sanitized = input.trim().toUpperCase();
-  
-  // Handle empty string after trimming
-  if (!sanitized) {
+
+  const sanitized = input.trim();
+  if (!sanitized || sanitized.length > 20) {
     return null;
   }
-  
-  // Validate maximum length to prevent potential issues
-  if (sanitized.length > 20) {
-    return null;
-  }
-  
-  // If it's just a number, convert to TKT-XXX format
-  if (/^\d+$/.test(sanitized)) {
-    const num = parseInt(sanitized, 10);
-    
-    // Validate reasonable range (1-999)
-    if (num < 1 || num > 999) {
-      return null;
-    }
-    
-    const paddedNumber = sanitized.padStart(3, '0');
-    return `TKT-${paddedNumber}`;
-  }
-  
-  // If it's already in TKT-XXX format, validate and return
-  if (/^TKT-\d{3}$/.test(sanitized)) {
-    const num = parseInt(sanitized.substring(4), 10);
-    
-    // Validate reasonable range (1-999)
-    if (num < 1 || num > 999) {
-      return null;
-    }
-    
-    return sanitized;
-  }
-  
-  // Handle partial formats like "TKT001" or "TKT-1"
-  if (/^TKT\d{1,3}$/.test(sanitized)) {
-    const numPart = sanitized.substring(3);
-    const num = parseInt(numPart, 10);
-    
-    if (num < 1 || num > 999) {
-      return null;
-    }
-    
-    const paddedNumber = numPart.padStart(3, '0');
-    return `TKT-${paddedNumber}`;
-  }
-  
-  if (/^TKT-\d{1,2}$/.test(sanitized)) {
-    const numPart = sanitized.substring(4);
-    const num = parseInt(numPart, 10);
-    
-    if (num < 1 || num > 999) {
-      return null;
-    }
-    
-    const paddedNumber = numPart.padStart(3, '0');
-    return `TKT-${paddedNumber}`;
-  }
-  
-  // Invalid format
-  return null;
+
+  return normalizeSharedTicketId(sanitized);
 }
 
 /**
@@ -117,7 +58,7 @@ function validateTicketId(ticketId) {
 
   const ticketsDir = getTicketsDir();
   const ticketFiles = fs.readdirSync(ticketsDir)
-    .filter(file => file.endsWith('.md') && file.startsWith(normalizedId));
+    .filter(file => markdownFilenameMatchesId(file, normalizedId));
 
   if (ticketFiles.length === 0) {
     return { isValid: false, error: `Ticket not found: ${normalizedId}` };

@@ -3,6 +3,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { execSync } from 'child_process';
 import { getTicketsDir, getConfig } from '../../utils/index.js';
+import { normalizeTicketId, markdownFilenameMatchesId, branchContainsTicketId } from '../../utils/ticket.js';
 import {
   isGitRepository,
   getCurrentBranch,
@@ -40,12 +41,6 @@ function parseArgs(args) {
   return { ids, flags };
 }
 
-function normalizeTicketId(input) {
-  if (input.startsWith('TKT-')) return input;
-  if (/^\d+$/.test(input)) return `TKT-${input.padStart(3, '0')}`;
-  return null;
-}
-
 function findTicketForBranch(ticketsDir, branch) {
   const files = fs.readdirSync(ticketsDir).filter(f => f.endsWith('.md'));
   for (const file of files) {
@@ -55,7 +50,9 @@ function findTicketForBranch(ticketsDir, branch) {
     if (match) {
       const fm = yaml.load(match[1]);
       const slug = fm.slug || '';
-      if (branch.includes(fm.id) || branch.includes(slug)) {
+      const idMatch = fm.id && branchContainsTicketId(branch, fm.id);
+      const slugMatch = Boolean(slug) && branch.includes(slug);
+      if (idMatch || slugMatch) {
         const body = content.split('---').slice(2).join('---').trim();
         return { frontmatter: fm, body, filePath };
       }
@@ -65,7 +62,7 @@ function findTicketForBranch(ticketsDir, branch) {
 }
 
 function loadTicket(ticketsDir, ticketId) {
-  const files = fs.readdirSync(ticketsDir).filter(f => f.startsWith(`${ticketId}-`));
+  const files = fs.readdirSync(ticketsDir).filter(f => markdownFilenameMatchesId(f, ticketId));
   if (files.length === 0) return null;
   const filePath = path.join(ticketsDir, files[0]);
   const content = fs.readFileSync(filePath, 'utf-8');

@@ -7,7 +7,14 @@ import {
   mockProcessCwd, 
   createMockVibeProject
 } from './test-helpers.js';
-import { resolveTicketId, isTicketSectionEmpty, checkEmptySections } from './ticket.js';
+import {
+  resolveTicketId,
+  isTicketSectionEmpty,
+  checkEmptySections,
+  normalizeTicketId,
+  markdownFilenameMatchesId,
+  branchContainsTicketId
+} from './ticket.js';
 
 describe('ticket utilities', () => {
   let tempDir;
@@ -162,6 +169,33 @@ describe('ticket utilities', () => {
       expect(result10.id).toBe('TKT-010');
     });
 
+    it('should not treat a shorter id as a prefix of a longer id', () => {
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-1000', title: 'Thousand', slug: 'thousand' }
+        ]
+      });
+
+      expect(resolveTicketId('100')).toBe(null);
+      expect(resolveTicketId('TKT-100')).toBe(null);
+      expect(resolveTicketId('1000').id).toBe('TKT-1000');
+      expect(resolveTicketId('TKT-1000').file).toBe('TKT-1000-thousand.md');
+    });
+
+    it('should keep TKT-100 and TKT-1000 distinct when both exist', () => {
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-1000', title: 'Thousand', slug: 'thousand' },
+          { id: 'TKT-100', title: 'Hundred', slug: 'hundred' },
+          { id: 'TKT-001', title: 'First', slug: 'first' }
+        ]
+      });
+
+      expect(resolveTicketId('TKT-01').file).toBe('TKT-001-first.md');
+      expect(resolveTicketId('100').file).toBe('TKT-100-hundred.md');
+      expect(resolveTicketId('1000').file).toBe('TKT-1000-thousand.md');
+    });
+
     it('should validate return object structure', () => {
       // Arrange
       createMockVibeProject(tempDir, {
@@ -180,6 +214,45 @@ describe('ticket utilities', () => {
       expect(typeof result.id).toBe('string');
       expect(typeof result.file).toBe('string');
       expect(typeof result.path).toBe('string');
+    });
+  });
+
+  describe('normalizeTicketId', () => {
+    it('pads short numeric and prefixed forms', () => {
+      expect(normalizeTicketId('1')).toBe('TKT-001');
+      expect(normalizeTicketId('01')).toBe('TKT-001');
+      expect(normalizeTicketId('TKT-1')).toBe('TKT-001');
+      expect(normalizeTicketId('TKT-01')).toBe('TKT-001');
+      expect(normalizeTicketId('tkt-010')).toBe('TKT-010');
+      expect(normalizeTicketId('TKT001')).toBe('TKT-001');
+      expect(normalizeTicketId('TKT-10')).toBe('TKT-010');
+      expect(normalizeTicketId('1000')).toBe('TKT-1000');
+    });
+
+    it('rejects values that are not ticket ids', () => {
+      expect(normalizeTicketId('')).toBe(null);
+      expect(normalizeTicketId('abc')).toBe(null);
+      expect(normalizeTicketId('TKT-abc')).toBe(null);
+      expect(normalizeTicketId(null)).toBe(null);
+    });
+  });
+
+  describe('markdownFilenameMatchesId', () => {
+    it('matches the id on a boundary', () => {
+      expect(markdownFilenameMatchesId('TKT-001-slug.md', 'TKT-001')).toBe(true);
+      expect(markdownFilenameMatchesId('TKT-001.md', 'TKT-001')).toBe(true);
+      expect(markdownFilenameMatchesId('TKT-0010-slug.md', 'TKT-001')).toBe(false);
+      expect(markdownFilenameMatchesId('TKT-010-slug.md', 'TKT-01')).toBe(false);
+      expect(markdownFilenameMatchesId('notes.txt', 'TKT-001')).toBe(false);
+    });
+  });
+
+  describe('branchContainsTicketId', () => {
+    it('matches the id token and not a longer id', () => {
+      expect(branchContainsTicketId('feature/TKT-001-slug', 'TKT-001')).toBe(true);
+      expect(branchContainsTicketId('feature/TKT-0010-slug', 'TKT-001')).toBe(false);
+      expect(branchContainsTicketId('feature/TKT-0010-slug', 'TKT-0010')).toBe(true);
+      expect(branchContainsTicketId('TKT-010', 'TKT-01')).toBe(false);
     });
   });
 
