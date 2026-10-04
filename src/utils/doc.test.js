@@ -86,6 +86,15 @@ describe('doc utils', () => {
       expect(resolveDocId('999')).toBeNull();
     });
 
+    it('does not resolve DOC-100 to DOC-1000', () => {
+      writeDoc(path.join(tempDir, '.vibe', 'docs'), 'DOC-1000', 'thousand');
+      expect(resolveDocId('1').file).toBe('DOC-001-first.md');
+      expect(resolveDocId('100')).toBeNull();
+      writeDoc(path.join(tempDir, '.vibe', 'docs'), 'DOC-100', 'hundred');
+      expect(resolveDocId('100').file).toBe('DOC-100-hundred.md');
+      expect(resolveDocId('1000').file).toBe('DOC-1000-thousand.md');
+    });
+
     it('throws on invalid format', () => {
       expect(() => resolveDocId('abc')).toThrow(/Invalid doc ID/);
     });

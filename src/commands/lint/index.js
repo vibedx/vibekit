@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { getTicketsDir, getConfigPath } from '../../utils/index.js';
+import { markdownFilenameMatchesId } from '../../utils/ticket.js';
 
 /**
  * Load configuration from config.yml
@@ -132,12 +133,12 @@ function validateFrontmatter(frontmatter, filename, config, requiredFields) {
   }
 
   // Validate ID format
-  if (frontmatter.id && !/^TKT-\d{3}$/.test(frontmatter.id)) {
-    errors.push(`Invalid ID format "${frontmatter.id}". Must follow pattern: TKT-XXX (e.g., TKT-001)`);
+  if (frontmatter.id && !/^TKT-\d{3,}$/.test(frontmatter.id)) {
+    errors.push(`Invalid ID format "${frontmatter.id}". Must follow pattern: TKT-NNN (e.g., TKT-001)`);
   }
 
-  // Validate filename matches ID
-  if (frontmatter.id && !filename.startsWith(frontmatter.id)) {
+  // Validate filename matches ID on a boundary (TKT-001 must not accept TKT-0010)
+  if (frontmatter.id && !markdownFilenameMatchesId(filename, frontmatter.id)) {
     errors.push(`Filename should start with ticket ID "${frontmatter.id}"`);
   }
 
@@ -594,7 +595,7 @@ Validation Rules:
   - Required sections: Description, Acceptance Criteria, Code Quality, etc.
   - Valid statuses: defined in config.yml
   - Valid priorities: defined in config.yml
-  - ID format: TKT-XXX (e.g., TKT-001)
+  - ID format: TKT-NNN (e.g., TKT-001, at least 3 digits)
       `);
       process.exit(0);
     } else if (!args[i].startsWith('--')) {

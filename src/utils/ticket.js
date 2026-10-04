@@ -2,6 +2,54 @@ import fs from 'fs';
 import path from 'path';
 
 /**
+ * Normalize a ticket identifier to `TKT-NNN` (at least 3 digits).
+ * Accepts `1`, `01`, `001`, `tkt-1`, `TKT-001`, `TKT001`, and ids longer than 3 digits.
+ * @param {string|number|null|undefined} input - Raw ticket identifier
+ * @returns {string|null} Normalized id, or null when the input is not a ticket id
+ */
+export function normalizeTicketId(input) {
+  if (input === null || input === undefined) return null;
+
+  let clean = String(input).trim().toUpperCase();
+  if (!clean) return null;
+
+  if (clean.startsWith('TKT-')) {
+    clean = clean.slice(4);
+  } else if (clean.startsWith('TKT')) {
+    clean = clean.slice(3);
+  }
+
+  if (!/^\d+$/.test(clean)) return null;
+  return `TKT-${clean.padStart(3, '0')}`;
+}
+
+/**
+ * True when a markdown filename belongs to this exact id.
+ * `TKT-001` matches `TKT-001.md` and `TKT-001-slug.md`, not `TKT-0010-slug.md`.
+ * @param {string} filename - Ticket or doc filename
+ * @param {string} id - Normalized id such as `TKT-001` or `DOC-001`
+ * @returns {boolean}
+ */
+export function markdownFilenameMatchesId(filename, id) {
+  if (!filename || !id || !String(filename).endsWith('.md')) return false;
+  const base = String(filename).slice(0, -3);
+  return base === id || base.startsWith(`${id}-`);
+}
+
+/**
+ * True when a branch name contains this ticket id as a whole token.
+ * `feature/TKT-001-slug` matches `TKT-001` and not `TKT-0010`.
+ * @param {string} branch - Git branch name
+ * @param {string} ticketId - Normalized ticket id
+ * @returns {boolean}
+ */
+export function branchContainsTicketId(branch, ticketId) {
+  if (!branch || !ticketId) return false;
+  const escaped = String(ticketId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return new RegExp(`(?:^|[^A-Za-z0-9])${escaped}(?![0-9])`).test(String(branch));
+}
+
+/**
  * Normalize ticket ID to find the actual ticket file
  * Handles formats: 9, 009, TKT-9, TKT-009
  * @param {string|number} input - The ticket identifier
@@ -22,26 +70,14 @@ export function resolveTicketId(input) {
     }
     
     const files = fs.readdirSync(ticketsDir).filter(f => f.endsWith('.md'));
-    
-    // Clean and validate input
-    let cleanInput = input.toString().trim().toUpperCase();
-    
-    // Remove TKT- prefix if present
-    if (cleanInput.startsWith('TKT-')) {
-      cleanInput = cleanInput.replace('TKT-', '');
-    }
-    
-    // Validate numeric part
-    if (!/^\d+$/.test(cleanInput)) {
+
+    const fullId = normalizeTicketId(input);
+    if (!fullId) {
       throw new Error(`Invalid ticket ID format: ${input}. Expected numeric ID or TKT-XXX format.`);
     }
-    
-    // Pad with zeros to make it 3 digits
-    const paddedNumber = cleanInput.padStart(3, '0');
-    const fullId = `TKT-${paddedNumber}`;
-    
-    // Find file that starts with this ID
-    const matchingFile = files.find(file => file.startsWith(fullId));
+
+    // Match the id on a boundary so TKT-001 does not select TKT-0010.
+    const matchingFile = files.find(file => markdownFilenameMatchesId(file, fullId));
     
     if (matchingFile) {
       return {

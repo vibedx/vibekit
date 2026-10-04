@@ -19,7 +19,7 @@ import {
   getDefaultBaseBranch
 } from '../../utils/git.js';
 import { loadSkillContext, buildAgentPrompt, spawnAgent } from '../../utils/agent.js';
-import { checkEmptySections, KEY_TICKET_SECTIONS } from '../../utils/ticket.js';
+import { checkEmptySections, KEY_TICKET_SECTIONS, normalizeTicketId, markdownFilenameMatchesId } from '../../utils/ticket.js';
 
 function parseTicketIds(args) {
   const ids = [];
@@ -64,14 +64,8 @@ function parseTicketIds(args) {
   return { ids, flags };
 }
 
-function normalizeTicketId(input) {
-  if (input.startsWith('TKT-')) return input;
-  if (/^\d+$/.test(input)) return `TKT-${input.padStart(3, '0')}`;
-  return null;
-}
-
 function loadTicket(ticketsDir, ticketId) {
-  const files = fs.readdirSync(ticketsDir).filter(f => f.startsWith(`${ticketId}-`));
+  const files = fs.readdirSync(ticketsDir).filter(f => markdownFilenameMatchesId(f, ticketId));
   if (files.length === 0) return null;
   const filePath = path.join(ticketsDir, files[0]);
   const content = fs.readFileSync(filePath, 'utf-8');

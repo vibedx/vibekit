@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { getProjectRoot } from './index.js';
+import { markdownFilenameMatchesId } from './ticket.js';
 
 const DEFAULT_DOCS_PATH = '.vibe/docs';
 
@@ -84,7 +85,7 @@ export function resolveDocId(input) {
   }
 
   const fullId = `DOC-${clean.padStart(3, '0')}`;
-  const matchingFile = files.find(file => file.startsWith(fullId));
+  const matchingFile = files.find(file => markdownFilenameMatchesId(file, fullId));
 
   if (matchingFile) {
     return {

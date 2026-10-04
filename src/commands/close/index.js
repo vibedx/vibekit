@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { getTicketsDir } from '../../utils/index.js';
+import { normalizeTicketId, markdownFilenameMatchesId } from '../../utils/ticket.js';
 import { removeWorktree, getGitStatus } from '../../utils/git.js';
 import { execSync } from 'child_process';
 
@@ -26,9 +27,12 @@ function closeCommand(args) {
   }
 
   const files = fs.readdirSync(ticketFolder);
-  const normalizedInput = ticketArg.startsWith("TKT-")
-    ? ticketArg
-    : `TKT-${ticketArg.padStart(3, "0")}`;
+  const normalizedInput = normalizeTicketId(ticketArg);
+
+  if (!normalizedInput) {
+    console.log(`❌ No ticket matching '${ticketArg}' found.`);
+    return;
+  }
 
   let matchFound = false;
 
@@ -45,8 +49,8 @@ function closeCommand(args) {
     if (match) {
       const frontmatter = yaml.load(match[1]);
       if (
-        frontmatter.id === normalizedInput ||
-        file.includes(normalizedInput)
+        normalizeTicketId(frontmatter?.id) === normalizedInput ||
+        markdownFilenameMatchesId(file, normalizedInput)
       ) {
         // Clean up worktree if one exists
         if (frontmatter.worktree_path) {

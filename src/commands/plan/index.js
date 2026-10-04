@@ -3,6 +3,7 @@ import path from 'path';
 import yaml from 'js-yaml';
 import { execSync, spawn } from 'child_process';
 import { getTicketsDir, getConfig } from '../../utils/index.js';
+import { normalizeTicketId, markdownFilenameMatchesId } from '../../utils/ticket.js';
 import {
   isGitRepository,
   getRepoName,
@@ -47,14 +48,8 @@ function parseTicketIds(args) {
   return { ids, flags };
 }
 
-function normalizeTicketId(input) {
-  if (input.startsWith('TKT-')) return input;
-  if (/^\d+$/.test(input)) return `TKT-${input.padStart(3, '0')}`;
-  return null;
-}
-
 function loadTicket(ticketsDir, ticketId) {
-  const files = fs.readdirSync(ticketsDir).filter(f => f.startsWith(`${ticketId}-`));
+  const files = fs.readdirSync(ticketsDir).filter(f => markdownFilenameMatchesId(f, ticketId));
   if (files.length === 0) return null;
   const filePath = path.join(ticketsDir, files[0]);
   const content = fs.readFileSync(filePath, 'utf-8');

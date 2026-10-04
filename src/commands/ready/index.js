@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import yaml from 'js-yaml';
 import { getTicketsDir } from '../../utils/index.js';
-import { checkEmptySections, KEY_TICKET_SECTIONS } from '../../utils/ticket.js';
+import { checkEmptySections, KEY_TICKET_SECTIONS, normalizeTicketId, markdownFilenameMatchesId } from '../../utils/ticket.js';
 
 /**
  * Mark a ticket as `ready` for agent pickup (e.g. by `vibe swarm`).
@@ -27,9 +27,11 @@ function readyCommand(args) {
     process.exit(1);
   }
 
-  const normalizedInput = ticketArg.startsWith('TKT-')
-    ? ticketArg
-    : `TKT-${ticketArg.padStart(3, '0')}`;
+  const normalizedInput = normalizeTicketId(ticketArg);
+  if (!normalizedInput) {
+    console.log(`❌ No ticket matching '${ticketArg}' found.`);
+    process.exit(1);
+  }
 
   const files = fs.readdirSync(ticketFolder).filter(f => f.endsWith('.md'));
 
@@ -42,7 +44,7 @@ function readyCommand(args) {
     if (!match) continue;
 
     const frontmatter = yaml.load(match[1]);
-    if (frontmatter.id !== normalizedInput && !file.includes(normalizedInput)) continue;
+    if (normalizeTicketId(frontmatter?.id) !== normalizedInput && !markdownFilenameMatchesId(file, normalizedInput)) continue;
 
     const empty = checkEmptySections(content, KEY_TICKET_SECTIONS);
     if (empty.length > 0 && !forceFlag) {

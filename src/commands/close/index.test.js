@@ -131,6 +131,56 @@ describe('close command', () => {
       expect(content).toContain('title: Ticket with priority');
     });
 
+    it('should close TKT-001 when given an unpadded TKT-01', () => {
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-001', title: 'First', status: 'open', slug: 'first' },
+          { id: 'TKT-010', title: 'Tenth', status: 'open', slug: 'tenth' },
+          { id: 'TKT-011', title: 'Eleventh', status: 'open', slug: 'eleventh' }
+        ]
+      });
+
+      closeCommand(['TKT-01']);
+
+      const read = (name) => fs.readFileSync(path.join(tempDir, '.vibe', 'tickets', name), 'utf-8');
+      expect(read('TKT-001-first.md')).toContain('status: done');
+      expect(read('TKT-010-tenth.md')).toContain('status: open');
+      expect(read('TKT-011-eleventh.md')).toContain('status: open');
+    });
+
+    it('should pad TKT-10 to TKT-010', () => {
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-001', title: 'First', status: 'open', slug: 'first' },
+          { id: 'TKT-010', title: 'Tenth', status: 'open', slug: 'tenth' },
+          { id: 'TKT-100', title: 'Hundred', status: 'open', slug: 'hundred' }
+        ]
+      });
+
+      closeCommand(['TKT-10']);
+
+      const read = (name) => fs.readFileSync(path.join(tempDir, '.vibe', 'tickets', name), 'utf-8');
+      expect(read('TKT-010-tenth.md')).toContain('status: done');
+      expect(read('TKT-001-first.md')).toContain('status: open');
+      expect(read('TKT-100-hundred.md')).toContain('status: open');
+    });
+
+    it('should accept a lowercase ticket id', () => {
+      createMockVibeProject(tempDir, {
+        withTickets: [
+          { id: 'TKT-002', title: 'Second', status: 'open', slug: 'second' }
+        ]
+      });
+
+      closeCommand(['tkt-002']);
+
+      const content = fs.readFileSync(
+        path.join(tempDir, '.vibe', 'tickets', 'TKT-002-second.md'),
+        'utf-8'
+      );
+      expect(content).toContain('status: done');
+    });
+
     it('should handle ticket not found', () => {
       // Arrange
       createMockVibeProject(tempDir, {
