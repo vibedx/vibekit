@@ -214,6 +214,45 @@ try {
     assertContains(r, 'VibeKit Tickets');
   });
 
+  test('vibe list --json exposes full fields and supports combined filters', () => {
+    const title = 'An E2E ticket with a title longer than the table can display';
+    assertExitCode(run(['new', title, '-n', '--assignee', 'Alice', '--author', 'Bob', '--priority', 'high'], { cwd: tmpDir }), 0);
+    const r = run(['list', '--json', '--status', 'open', '--assignee=alice'], { cwd: tmpDir });
+    assertExitCode(r, 0);
+    const tickets = JSON.parse(r.stdout);
+    if (tickets.length !== 1 || tickets[0].title !== title || tickets[0].assignee !== 'Alice' || tickets[0].author !== 'Bob' || tickets[0].priority !== 'high' || !tickets[0].file.endsWith('.md')) {
+      throw new Error(`Unexpected JSON ticket fields: ${r.stdout}`);
+    }
+    const owner = run(['list', '--json', '--status=open', '--owner', 'ALICE'], { cwd: tmpDir });
+    assertExitCode(owner, 0);
+    if (JSON.stringify(JSON.parse(owner.stdout)) !== JSON.stringify(tickets)) throw new Error('Owner alias should return the same tickets');
+    const all = run(['list', '--json'], { cwd: tmpDir });
+    assertExitCode(all, 0);
+    const ids = JSON.parse(all.stdout).map(t => Number(t.id.replace('TKT-', '')));
+    if (ids.some((id, i) => i > 0 && id < ids[i - 1])) throw new Error('JSON tickets must be sorted numerically');
+  });
+
+  test('vibe list --json returns [] for unmatched filters and empty projects', () => {
+    const unmatched = run(['list', '--json', '--owner=nobody'], { cwd: tmpDir });
+    assertExitCode(unmatched, 0);
+    if (JSON.stringify(JSON.parse(unmatched.stdout)) !== '[]') throw new Error('Expected empty JSON array');
+    const emptyDir = setupWorkspace();
+    try {
+      assertExitCode(run(['init'], { cwd: emptyDir }), 0);
+      const empty = run(['list', '--json'], { cwd: emptyDir });
+      assertExitCode(empty, 0);
+      if (JSON.stringify(JSON.parse(empty.stdout)) !== '[]') throw new Error('Expected empty JSON array');
+    } finally {
+      teardownWorkspace(emptyDir);
+    }
+  });
+
+  test('vibe list rejects missing filter values instead of listing everything', () => {
+    const r = run(['list', '--assignee', '--json'], { cwd: tmpDir });
+    assertExitCode(r, 1);
+    assertContains(r, 'requires a value');
+  });
+
   test('vibe lint --fix', () => {
     const r = run(['lint', '--fix'], { cwd: tmpDir });
     assertContains(r, 'Summary');

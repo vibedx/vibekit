@@ -8,6 +8,7 @@ import {
   createMockVibeProject
 } from '../../utils/test-helpers.js';
 import listCommand from './index.js';
+import fs from 'fs';
 
 describe('list command', () => {
   let tempDir;
@@ -126,6 +127,66 @@ describe('list command', () => {
 
       // Assert - should handle gracefully and continue
       expect(exitMock.exitCalls).toContain(0);
+    });
+  });
+
+  describe('JSON output and filters', () => {
+    const tickets = [
+      { id: 'TKT-010', title: 'A full ticket title that is longer than forty characters', status: 'open', priority: 'high', assignee: 'Alice', author: 'Bob', worktree_path: '/tmp/branch' },
+      { id: 'TKT-002', title: 'Earlier', status: 'done', assignee: 'alice' },
+      { id: 'TKT-003', title: 'Other assignee', status: 'open', assignee: 'Charlie' }
+    ];
+
+    function jsonResult(args = []) {
+      listCommand(['--json', ...args]);
+      return JSON.parse(consoleMock.logs.log.join('\n'));
+    }
+
+    it('emits full fields and sorts by numeric ticket ID without table output', () => {
+      const project = createMockVibeProject(tempDir, { withTickets: tickets });
+      const ticketPath = project.ticketPaths[0];
+      fs.writeFileSync(ticketPath, fs.readFileSync(ticketPath, 'utf-8').replace('priority: high', 'priority: high\nauthor: Bob\nworktree_path: /tmp/branch'));
+      const result = jsonResult();
+      expect(result.map(ticket => ticket.id)).toEqual(['TKT-002', 'TKT-003', 'TKT-010']);
+      expect(result[2]).toEqual({ ...tickets[0], file: 'TKT-010-a-full-ticket-title-that-is-longer-than-forty-characters.md' });
+    });
+
+    it('emits an empty array for an empty directory', () => {
+      createMockVibeProject(tempDir);
+      expect(jsonResult()).toEqual([]);
+      expect(exitMock.exitCalls).toEqual([]);
+    });
+
+    it.each([
+      ['--status=open', '--assignee=ALICE'],
+      ['--status', 'open', '--assignee', 'ALICE'],
+      ['--status=open', '--owner', 'alice'],
+      ['--status', 'open', '--owner=alice']
+    ])('combines filters with either syntax: %s %s', (...args) => {
+      createMockVibeProject(tempDir, { withTickets: tickets });
+      expect(jsonResult(args).map(ticket => ticket.id)).toEqual(['TKT-010']);
+    });
+
+    it('emits an empty array when filters match nothing', () => {
+      createMockVibeProject(tempDir, { withTickets: tickets });
+      expect(jsonResult(['--assignee', 'nobody'])).toEqual([]);
+    });
+
+    it('supports spaced filters in the default table', () => {
+      createMockVibeProject(tempDir, { withTickets: tickets });
+      listCommand(['--status', 'open', '--assignee', 'alice']);
+      const output = consoleMock.logs.log.join('\n');
+      expect(output).toContain('VibeKit Tickets');
+      expect(output).toContain('TKT-010');
+      expect(output).not.toContain('TKT-002');
+      expect(output).not.toContain('TKT-003');
+    });
+
+    it.each([['--status'], ['--assignee'], ['--owner'], ['--status='], ['--assignee', '--json']])('rejects missing filter values: %s', (...args) => {
+      createMockVibeProject(tempDir, { withTickets: tickets });
+      expect(() => listCommand(args)).toThrow('process.exit(1)');
+      expect(consoleMock.logs.error.join('\n')).toContain('requires a value');
+      expect(consoleMock.logs.log).toEqual([]);
     });
   });
 
