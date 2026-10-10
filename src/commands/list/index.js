@@ -12,14 +12,27 @@ function listCommand(args) {
   let statusFilter = null;
   let assigneeFilter = null;
 
+  const jsonOutput = args.includes('--json');
+  const filterOptions = ['--status', '--assignee', '--owner'];
+
   for (let i = 0; i < args.length; i++) {
-    if (args[i].startsWith("--status=")) {
-      statusFilter = args[i].split("=")[1];
-    } else if (args[i].startsWith("--assignee=") || args[i].startsWith("--owner=")) {
-      assigneeFilter = args[i].split("=")[1];
+    const argument = args[i];
+    const separator = argument.indexOf('=');
+    const option = separator === -1 ? argument : argument.slice(0, separator);
+    if (!filterOptions.includes(option)) continue;
+
+    const value = separator === -1 ? args[++i] : argument.slice(separator + 1);
+    if (!value || value.startsWith('--')) {
+      console.error(`❌ ${option} requires a value.`);
+      process.exit(1);
+    }
+    if (option === '--status') {
+      statusFilter = value;
+    } else {
+      assigneeFilter = value;
     }
   }
-  
+
   // Get tickets directory
   const ticketDir = getTicketsDir();
   
@@ -31,7 +44,7 @@ function listCommand(args) {
   // Read all markdown files in the tickets directory
   const files = fs.readdirSync(ticketDir).filter(file => file.endsWith(".md"));
   
-  if (files.length === 0) {
+  if (files.length === 0 && !jsonOutput) {
     console.log("No tickets found.");
     process.exit(0);
   }
@@ -81,6 +94,11 @@ function listCommand(args) {
     return idA - idB;
   });
   
+  if (jsonOutput) {
+    console.log(JSON.stringify(filteredTickets, null, 2));
+    return;
+  }
+
   if (filteredTickets.length === 0) {
     console.log(statusFilter 
       ? `No tickets found with status: ${statusFilter}`

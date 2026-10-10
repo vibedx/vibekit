@@ -125,6 +125,11 @@ vibe list
 vibe list --status=open
 vibe list --assignee=alice
 
+# Machine-readable output: full titles and ticket fields, sorted by ID.
+# Filters accept either --status=open or --status open (also assignee/owner).
+vibe list --json
+vibe list --json --status open --assignee alice
+
 # Check active worktrees and ticket progress
 vibe status
 
@@ -153,6 +158,10 @@ vibe start TKT-001 -w
 vibe start TKT-001 --agent                  # Single ticket, current directory
 vibe start TKT-001 TKT-002 -w --agent       # Multiple tickets in worktrees with agents
 ```
+
+`vibe list --json` writes a JSON array to stdout, including `[]` when no tickets
+match. Each item contains `id`, `title`, `status`, `priority`, `assignee`, `author`,
+`worktree_path`, and `file` (the ticket filename). Parse warnings go to stderr.
 
 ### 📋 Plans → Tickets
 ```bash
