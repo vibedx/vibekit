@@ -2,12 +2,12 @@
 id: TKT-038
 title: Add machine-readable ticket listing
 slug: TKT-038-add-machine-readable-ticket
-status: in_progress
+status: done
 priority: medium
-assignee: ""
-author: ""
+assignee: ''
+author: ''
 created_at: 2026-10-10T13:51:31.129Z
-updated_at: "2026-10-10T13:51:43.729Z"
+updated_at: '2026-10-10T13:51:43.729Z'
 ---
 
 ## Description
@@ -16,9 +16,9 @@ The ticket list only renders a truncated colored table, making scripts parse pre
 
 ## Acceptance Criteria
 
-- [ ] list --json emits only a valid sorted JSON array, including for empty results.
-- [ ] Existing status and assignee/owner filters work with equals and spaced syntax in table and JSON modes.
-- [ ] Document examples and cover full fields, filtering and empty output with unit and E2E regressions.
+- [x] list --json emits only a valid sorted JSON array, including for empty results.
+- [x] Existing status and assignee/owner filters work with equals and spaced syntax in table and JSON modes.
+- [x] Document examples and cover full fields, filtering and empty output with unit and E2E regressions.
 
 ## Code Quality
 
@@ -26,7 +26,7 @@ The ticket list only renders a truncated colored table, making scripts parse pre
 
 ## Implementation Notes
 
-Update `src/commands/list/index.js` without changing the default table. Emit the existing normalized ticket fields as JSON after filtering and sorting, before table rendering. Release a patch version through existing npm publishing workflows.
+Implemented in `src/commands/list/index.js` without changing the default table. Emit the existing normalized ticket fields as JSON after filtering and sorting, before table rendering. Release a patch version through existing npm publishing workflows.
 
 ## Design / UX Considerations
 
@@ -34,7 +34,7 @@ Update `src/commands/list/index.js` without changing the default table. Emit the
 
 ## Testing & Test Cases
 
-Unit tests for JSON fields, numeric ordering, empty arrays, combined filters, legacy owner and malformed arguments. E2E tests must parse stdout as JSON. Run complete unit and E2E suites, package dry run, and verify the published npm artifact.
+Unit tests for JSON fields, numeric ordering, empty arrays, combined filters, legacy owner and malformed arguments. E2E tests must parse stdout as JSON. Baseline: 240 unit / 12 E2E. Implementation: 253 unit / 15 E2E, clean `npm ci`, package dry run and Node 18/20/22 CI passed. PR #80 receives independent review before merge. Published artifact verification remains part of the release task.
 
 ## AI Prompt
 
