@@ -42,6 +42,10 @@ vibe new "Add user authentication"
 
 # Start working on it
 vibe start TKT-001
+
+# See every command, or check your version
+vibe --help
+vibe --version
 ```
 
 ### 🤖 Use with AI Agents (skills.sh)

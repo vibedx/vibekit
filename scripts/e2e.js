@@ -179,6 +179,34 @@ const tmpDir = setupWorkspace();
 console.log(`\n  Workspace: ${tmpDir}`);
 
 try {
+  test('vibe --version', () => {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.resolve(__dirname, '..', 'package.json'), 'utf-8')
+    );
+
+    for (const flag of ['--version', '-v', 'version']) {
+      const r = run([flag], { cwd: tmpDir });
+      assertExitCode(r, 0);
+      assertContains(r, pkg.version);
+    }
+  });
+
+  test('vibe --help', () => {
+    for (const args of [['--help'], ['-h'], ['help'], []]) {
+      const r = run(args, { cwd: tmpDir });
+      assertExitCode(r, 0);
+      assertContains(r, 'Usage: vibe <command> [options]');
+      assertContains(r, 'Set up .vibe/ in the current project');
+      assertContains(r, '-v, --version');
+    }
+  });
+
+  test('vibe <unknown-command> exits 1', () => {
+    const r = run(['definitely-not-a-command'], { cwd: tmpDir });
+    assertExitCode(r, 1);
+    assertContains(r, 'not found');
+  });
+
   test('vibe init', () => {
     const r = run(['init'], { cwd: tmpDir });
     assertExitCode(r, 0);
